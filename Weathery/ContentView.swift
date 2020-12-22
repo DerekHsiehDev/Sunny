@@ -20,7 +20,7 @@ struct Cities: Hashable {
 
 var cities = [
     Cities(city: "Corona", country: "California")
-
+    
 ]
 
 
@@ -36,32 +36,119 @@ struct ContentView: View {
             Color(#colorLiteral(red: 0.9371728301, green: 0.9373074174, blue: 0.9371433854, alpha: 1))
                 .edgesIgnoringSafeArea(.all)
             VStack {
-                Spacer()
                 
-                if addButtonTapped {
-                    
-                    CitiesCard()
-                }
                 
-        
+                
+                
+                
                 VStack {
                     
-                    
-                    VStack {
-                        Text("heavy rain")
-                            .background(
-                                RoundedRectangle(cornerRadius: 17)
-                                    .fill(Color.blue)
-                                    x
-                            )
+                    Button(action: {addButtonTapped.toggle() }) {
                         
+                        HStack {
+                            Spacer()
+                            Text(addButtonTapped ? "add" : "Corona,")
+                                .fontWeight(addButtonTapped ? .light : .bold)
+                                .foregroundColor(.black)
+                            Text(addButtonTapped ? "city" : "USA")
+                                .fontWeight(addButtonTapped ? .bold : .light)
+                                .foregroundColor(.black)
                             
+                            Spacer()
+                        }
+                        .padding()
+                        
                     }
                     
+                    if addButtonTapped {
+                        
+                        CitiesCard()
+                    } else {
+                        
+                        
+                        VStack {
+                            
+                            
+                            
+                            //                                VStack(alignment: .leading) {
+                            //
+                            //                                    Image(systemName: "cloud.heavyrain.fill")
+                            //
+                            //                                        .font(.system(size: 75))
+                            //
+                            //                                        .foregroundColor(.white)
+                            //
+                            //
+                            //                                        .padding(.horizontal)
+                            //                                        .padding(.top, 30)
+                            //
+                            //
+                            
+                            //
+                            //                                }
+                            //
+                            
+                            
+                            HStack(alignment: .center) {
+                                Image(systemName: "cloud.heavyrain.fill")
+                                    
+                                    .font(.system(size: 75))
+                                    
+                                    .foregroundColor(.white)
+                                    
+                                    
+                                    .padding(.horizontal)
+                                    .padding(.top, 30)
+                                
+                                Spacer()
+                                
+                                Text("59°")
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 75, weight: .bold, design: .default))
+                                    .padding(.horizontal)
+                                    .padding(.top, 30)
+                            }
+                            
+                            
+                            
+                            HStack(alignment: .center) {
+                                Text("heavy rain")
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 25, weight: .semibold, design: .rounded))
+                                    
+                                    .padding(.horizontal)
+                                    .padding(.bottom, 15)
+                                
+                                Spacer()
+                          
+                                    
+                                    Text("feels like: 55°")
+                                        .foregroundColor(.white)
+                                        .font(.system(size: 15, weight: .bold, design: .default))
+                                        .padding(.horizontal)
+                                        .padding(.bottom, 15)
+                                
+                                
+                            }
+                            .padding()
+                            
+                            
+                            
+                            
+                        }
+                        .frame(width: UIScreen.main.bounds.width - 45, height: 200)
+                        .background(
+                            RoundedRectangle(cornerRadius: 17)
+                                .fill(LinearGradient(gradient: Gradient(colors: [Color(#colorLiteral(red: 0.4078431373, green: 0.7411764706, blue: 0.9803921569, alpha: 1)), Color(#colorLiteral(red: 0.2745098039, green: 0.5098039216, blue: 0.9921568627, alpha: 1))]), startPoint: .top, endPoint: .bottom))
+                            
+                        )
+                        
+                    }
+                    
+                    Spacer()
                     
                     
                     
-                
                     HStack {
                         Spacer()
                         
@@ -86,10 +173,13 @@ struct ContentView: View {
                         }
                         
                     }
-            
-            
+                    
+                    
+                    
+                    
                 }
             }
+            
         }
         
     }
@@ -105,11 +195,12 @@ struct ContentView_Previews: PreviewProvider {
 struct CitiesCard: View {
     @State var searchText = ""
     @ObservedObject var fetcher = CityFetcher()
-
+    
     
     var body: some View {
         VStack {
             VStack {
+                
                 HStack {
                     TextField("search city here", text: $searchText)
                     
@@ -150,19 +241,19 @@ struct CitiesCard: View {
                             
                         }.padding(.top, 30)
                     }
-                
+                    
                     if searchText.count >= 3 {
                         ScrollView {
                             ForEach(fetcher.cities.filter({"\($0)".contains(searchText)}), id: \.self) { city in
-
-
+                                
+                                
                                 HStack {
                                     Text("\(city.city ?? ""), \(city.country ?? "")")
                                         .foregroundColor(.white)
                                     Spacer()
                                         
                                         
-                                    .padding()
+                                        .padding()
                                 }
                                 .background(Color.black)
                                 .padding(.horizontal, 40)
@@ -175,29 +266,30 @@ struct CitiesCard: View {
                                 Divider()
                                     .background(Color(.systemGray4))
                                     .padding(.leading, 40)
-                                    
-
+                                
+                                
                             }
                         }
-
+                        
                     }
                 }
                 
                 
                 
                 Spacer()
-            }.padding(.top, 50)
-        }.background(
+            }
+            //            .padding(.top, 50)
+            
+        }
+        .frame(width: UIScreen.main.bounds.width - 15, height: 600)
+        .transition(AnyTransition.opacity)
+        .background(
             RoundedRectangle(cornerRadius: 25)
-                .transition(AnyTransition.slide.combined(with: .opacity).animation(.easeInOut(duration: 2.0)))
-                .padding(.top, 50)
+                
+                //                .padding(.top, 50)
                 .padding(.horizontal, 10)
         )
     }
 }
 
-struct CitiesViewPreview: PreviewProvider {
-    static var previews: some View {
-        CitiesCard()
-    }
-}
+
