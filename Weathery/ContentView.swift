@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-class Cities {
+struct Cities: Hashable {
     
     var city: String
     var country: String
@@ -18,14 +18,12 @@ class Cities {
     }
 }
 
-let cities = [
-    "Corona",
-    "Taipei",
-    "Los Angeles",
-    "Palm Springs",
-    "Mumbai",
-    "Tokyo"
+var cities = [
+    Cities(city: "Corona", country: "California")
+
 ]
+
+
 
 
 
@@ -41,56 +39,28 @@ struct ContentView: View {
                 Spacer()
                 
                 if addButtonTapped {
-                    ZStack {
-                        VStack {
-                            RoundedRectangle(cornerRadius: 25)
-                                .transition(AnyTransition.slide.combined(with: .opacity).animation(.easeInOut(duration: 2.0)))
-                                .padding(.top, 50)
-                                .padding(.horizontal, 10)
-                        }
-                        VStack {
-                            HStack {
-                                TextField("search city here", text: $searchText)
-                               
-                           
-                                
-                            }
-                            .padding()
-                           
-                            .background(Color(#colorLiteral(red: 0.9999127984, green: 1, blue: 0.9998814464, alpha: 1)))
-                            .cornerRadius(17)
-                            .frame(width: UIScreen.main.bounds.width - 60, height: 100)
-                            
-                        
-                            
-                           
-                            ScrollView {
-                                ForEach(cities, id: \.self) { city in
-                                        HStack {
-                                            Text("\(city), ")
-                                                .foregroundColor(.white)
-                                                .fontWeight(.bold)
-                                                
-                                                .padding(.leading, 40)
-                                            Text("United States")
-                                                .foregroundColor(.white)
-                                            Spacer()
-                                        }
-                                        .padding(.bottom, 70)
-                                        
-                                        Spacer()
-                                    
-                                    
-                                
-                                
-                                }.padding(.top, 30)
-                            }
-                            Spacer()
-                        }.padding(.top, 50)
+                    
+                    CitiesCard()
                 }
                 
         
-            }
+                VStack {
+                    
+                    
+                    VStack {
+                        Text("heavy rain")
+                            .background(
+                                RoundedRectangle(cornerRadius: 17)
+                                    .fill(Color.blue)
+                                    x
+                            )
+                        
+                            
+                    }
+                    
+                    
+                    
+                    
                 
                     HStack {
                         Spacer()
@@ -118,15 +88,116 @@ struct ContentView: View {
                     }
             
             
-            
+                }
+            }
         }
         
     }
-    }
+    
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+    }
+}
+
+struct CitiesCard: View {
+    @State var searchText = ""
+    @ObservedObject var fetcher = CityFetcher()
+
+    
+    var body: some View {
+        VStack {
+            VStack {
+                HStack {
+                    TextField("search city here", text: $searchText)
+                    
+                    
+                    
+                }
+                .padding()
+                
+                .background(Color(#colorLiteral(red: 0.9999127984, green: 1, blue: 0.9998814464, alpha: 1)))
+                .cornerRadius(17)
+                .frame(width: UIScreen.main.bounds.width - 60, height: 100)
+                
+                ZStack {
+                    ScrollView {
+                        ForEach(cities, id: \.self) { city in
+                            HStack {
+                                Text("\(city.city), ")
+                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+                                    .fontWeight(.bold)
+                                    
+                                    .padding(.leading, 40)
+                                Text("\(city.country)")
+                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+                                Spacer()
+                                
+                                Text("\(59)°")
+                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+                                    .fontWeight(.bold)
+                                    .font(.title3)
+                                    .padding(.trailing, 40)
+                            }
+                            .padding(.bottom, 70)
+                            
+                            Spacer()
+                            
+                            
+                            
+                            
+                        }.padding(.top, 30)
+                    }
+                
+                    if searchText.count >= 3 {
+                        ScrollView {
+                            ForEach(fetcher.cities.filter({"\($0)".contains(searchText)}), id: \.self) { city in
+
+
+                                HStack {
+                                    Text("\(city.city ?? ""), \(city.country ?? "")")
+                                        .foregroundColor(.white)
+                                    Spacer()
+                                        
+                                        
+                                    .padding()
+                                }
+                                .background(Color.black)
+                                .padding(.horizontal, 40)
+                                .onTapGesture {
+                                    searchText = ""
+                                    
+                                    cities.append(Cities(city: city.city!, country: city.country!))
+                                    
+                                }
+                                Divider()
+                                    .background(Color(.systemGray4))
+                                    .padding(.leading, 40)
+                                    
+
+                            }
+                        }
+
+                    }
+                }
+                
+                
+                
+                Spacer()
+            }.padding(.top, 50)
+        }.background(
+            RoundedRectangle(cornerRadius: 25)
+                .transition(AnyTransition.slide.combined(with: .opacity).animation(.easeInOut(duration: 2.0)))
+                .padding(.top, 50)
+                .padding(.horizontal, 10)
+        )
+    }
+}
+
+struct CitiesViewPreview: PreviewProvider {
+    static var previews: some View {
+        CitiesCard()
     }
 }

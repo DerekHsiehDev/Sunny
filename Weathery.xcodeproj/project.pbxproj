@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4B701CCB2591C35500BDD64F /* CityDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B701CC82591C35100BDD64F /* CityDecoder.swift */; };
+		4B701CCC2591C35500BDD64F /* CityFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B701CC92591C35200BDD64F /* CityFetcher.swift */; };
+		4B701CCD2591C35500BDD64F /* cityJson.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B701CCA2591C35400BDD64F /* cityJson.swift */; };
 		4BB081E82590706B004B56A6 /* WeatheryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB081E72590706B004B56A6 /* WeatheryApp.swift */; };
 		4BB081EA2590706B004B56A6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB081E92590706B004B56A6 /* ContentView.swift */; };
 		4BB081EC2590706C004B56A6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4BB081EB2590706C004B56A6 /* Assets.xcassets */; };
@@ -14,6 +17,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4B701CC82591C35100BDD64F /* CityDecoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CityDecoder.swift; sourceTree = "<group>"; };
+		4B701CC92591C35200BDD64F /* CityFetcher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CityFetcher.swift; sourceTree = "<group>"; };
+		4B701CCA2591C35400BDD64F /* cityJson.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = cityJson.swift; sourceTree = "<group>"; };
 		4BB081E42590706B004B56A6 /* Weathery.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Weathery.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BB081E72590706B004B56A6 /* WeatheryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatheryApp.swift; sourceTree = "<group>"; };
 		4BB081E92590706B004B56A6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -33,6 +39,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4B701CCF2591C38C00BDD64F /* World Cities */ = {
+			isa = PBXGroup;
+			children = (
+				4B701CC82591C35100BDD64F /* CityDecoder.swift */,
+				4B701CC92591C35200BDD64F /* CityFetcher.swift */,
+				4B701CCA2591C35400BDD64F /* cityJson.swift */,
+			);
+			path = "World Cities";
+			sourceTree = "<group>";
+		};
 		4BB081DB2590706B004B56A6 = {
 			isa = PBXGroup;
 			children = (
@@ -54,6 +70,7 @@
 			children = (
 				4BB081E72590706B004B56A6 /* WeatheryApp.swift */,
 				4BB081E92590706B004B56A6 /* ContentView.swift */,
+				4B701CCF2591C38C00BDD64F /* World Cities */,
 				4BB081EB2590706C004B56A6 /* Assets.xcassets */,
 				4BB081F02590706C004B56A6 /* Info.plist */,
 				4BB081ED2590706C004B56A6 /* Preview Content */,
@@ -139,6 +156,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				4BB081EA2590706B004B56A6 /* ContentView.swift in Sources */,
+				4B701CCB2591C35500BDD64F /* CityDecoder.swift in Sources */,
+				4B701CCC2591C35500BDD64F /* CityFetcher.swift in Sources */,
+				4B701CCD2591C35500BDD64F /* cityJson.swift in Sources */,
 				4BB081E82590706B004B56A6 /* WeatheryApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
