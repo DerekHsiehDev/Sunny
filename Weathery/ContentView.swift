@@ -30,20 +30,22 @@ var cities = [
 struct ContentView: View {
     @State var addButtonTapped = false
     @State var searchText = ""
+    let weatherModel = WeatherModel()
+    @ObservedObject var viewModel = WeatherViewModel()
+
     
     var body: some View {
         ZStack {
             Color(#colorLiteral(red: 0.9371728301, green: 0.9373074174, blue: 0.9371433854, alpha: 1))
                 .edgesIgnoringSafeArea(.all)
             VStack {
-                
-                
-                
-                
+       
                 
                 VStack {
                     
-                    Button(action: {addButtonTapped.toggle() }) {
+                    Button(action: {addButtonTapped.toggle()
+                    
+                    }) {
                         
                         HStack {
                             Spacer()
@@ -102,7 +104,7 @@ struct ContentView: View {
                                 
                                 Spacer()
                                 
-                                Text("59°")
+                                Text("\(viewModel.temp)°")
                                     .foregroundColor(.white)
                                     .font(.system(size: 75, weight: .bold, design: .default))
                                     .padding(.horizontal)
@@ -122,7 +124,7 @@ struct ContentView: View {
                                 Spacer()
                           
                                     
-                                    Text("feels like: 55°")
+                                Text("feels like: \(viewModel.feels_like)°")
                                         .foregroundColor(.white)
                                         .font(.system(size: 15, weight: .bold, design: .default))
                                         .padding(.horizontal)
@@ -140,7 +142,85 @@ struct ContentView: View {
                         .background(
                             RoundedRectangle(cornerRadius: 17)
                                 .fill(LinearGradient(gradient: Gradient(colors: [Color(#colorLiteral(red: 0.4078431373, green: 0.7411764706, blue: 0.9803921569, alpha: 1)), Color(#colorLiteral(red: 0.2745098039, green: 0.5098039216, blue: 0.9921568627, alpha: 1))]), startPoint: .top, endPoint: .bottom))
+                                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0.0, y: 0.0)
                             
+                        ).padding(.bottom, 15)
+                        
+                        HStack {
+                            
+                            VStack() {
+                                Text("aqi")
+                                    .font(.system(size: 15, weight: .semibold, design: .default))
+                                    .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
+                                    .padding()
+//
+//                                Spacer()
+                                
+                                Text("\(65)")
+                                    .font(.system(size: 25, weight: .bold, design: .default))
+                                    .foregroundColor(Color(#colorLiteral(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479, alpha: 1)))
+                                    .padding()
+                                
+                                
+                            }
+                            
+                            VStack {
+                                
+                                Text("wind")
+                                    .font(.system(size: 15, weight: .semibold, design: .default))
+                                    .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
+                                    .padding()
+                                
+//                                Spacer()
+                                
+                                HStack(spacing: 5) {
+                                    Text("\(23)")
+                                        .font(.system(size: 25, weight: .bold, design: .default))
+                                        .foregroundColor(Color(.black))
+                                        
+                                    Text("mph")
+                                        .font(.caption)
+                                        .foregroundColor(Color(#colorLiteral(red: 0.4431372549, green: 0.431372549, blue: 0.431372549, alpha: 1)))
+                                }.padding()
+                                
+                                    
+                                
+                            }
+                            
+                            VStack {
+                                Text("high")
+                                    .font(.system(size: 15, weight: .semibold, design: .default))
+                                    .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
+                                    .padding()
+                                
+//                                Spacer()
+                                
+                                Text("\(77)°")
+                                    .font(.system(size: 25, weight: .bold, design: .default))
+                                    .foregroundColor(Color(#colorLiteral(red: 0.7215686275, green: 0.3529411765, blue: 1, alpha: 1)))
+                                    .padding()
+                                
+                            }
+                            
+                            VStack {
+                                Text("low")
+                                    .font(.system(size: 15, weight: .semibold, design: .default))
+                                    .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
+                                    .padding()
+                                
+//                                Spacer()
+                                
+                                Text("\(65)°")
+                                    .font(.system(size: 25, weight: .bold, design: .default))
+                                    .foregroundColor(Color(#colorLiteral(red: 0.9098039216, green: 0.6549019608, blue: 0.1725490196, alpha: 1)))
+                                    .padding()
+                            }
+                            
+                        }.frame(width: UIScreen.main.bounds.width - 45, height: 100)
+                        .background(
+                            RoundedRectangle(cornerRadius: 17)
+                                .fill(Color.white)
+                                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0.0, y: 0.0)
                         )
                         
                     }
@@ -159,7 +239,7 @@ struct ContentView: View {
                         }) {
                             Circle()
                                 .fill(addButtonTapped ? .black : Color.white)
-                                .frame(width: /*@START_MENU_TOKEN@*/100/*@END_MENU_TOKEN@*/, height: /*@START_MENU_TOKEN@*/100/*@END_MENU_TOKEN@*/)
+                                .frame(width: 100, height: 100)
                                 .padding(.horizontal)
                                 .shadow(color: Color(addButtonTapped ? .black : #colorLiteral(red: 0.7450370193, green: 0.7255315781, blue: 0.7254028916, alpha: 1)), radius: 4, x: 0, y: 0)
                                 .overlay(
@@ -179,6 +259,10 @@ struct ContentView: View {
                     
                 }
             }
+            .onAppear(perform: {
+                weatherModel.getOneTimeWeather(city: cities.first!.city)
+               
+            })
             
         }
         
