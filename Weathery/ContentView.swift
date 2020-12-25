@@ -44,6 +44,13 @@ struct ContentView: View {
     @ObservedObject var fetcher = CityFetcher()
     @State var keyboardInUse = false
 //    @State var temps = [String: Int]()
+    
+    //circle view
+    let circleWidth: CGFloat = 300 //UIScreen.main.bounds.width + 300
+    let selectorYOffset: CGFloat = 5
+    @State var rotateState: Double = 0
+    @State var dragTranslation = CGSize.zero
+    @State private var dragging = false
 
    @ObservedObject public var viewModel = WeatherViewModel()
 
@@ -52,7 +59,9 @@ struct ContentView: View {
         ZStack {
             Color(#colorLiteral(red: 0.9371728301, green: 0.9373074174, blue: 0.9371433854, alpha: 1))
                 .edgesIgnoringSafeArea(.all)
-            VStack {
+            
+   
+            VStack(alignment: .center) {
        
                 
                 VStack {
@@ -352,16 +361,74 @@ struct ContentView: View {
                                 .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0.0, y: 0.0)
                         )
                         
+//                        HourlyTemperatureCard()
+                        
+                        VStack {
+                            Text("today")
+                                .font(.system(size: 20, weight: .semibold, design: .default))
+                                .padding()
+                                .padding(.bottom)
+                            
+                          
+                        }
+                        
+//                        VStack {
+//
+//                            Text("today")
+//                                .font(.system(size: 20, weight: .semibold, design: .default))
+//                            ZStack() {
+//                                Circle()
+//                                    .stroke(style:  StrokeStyle(
+//                                        lineWidth: 5,
+//                                        lineCap: .round,
+//                                        dash: [20]
+//
+//                                    ))
+//                                    .frame(width: circleWidth, height: circleWidth)
+//
+//                                    .rotationEffect(Angle(degrees: Double(self.dragTranslation.width/10)), anchor: .center)
+//
+//                                    .gesture(DragGesture()
+//                                                .onChanged({ (value) in
+//                                                    dragTranslation = value.translation
+//                                                    print(value.translation.width)
+//                                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+//                                                    dragging = true
+//                                                })
+//                                                .onEnded({ (value) in
+//                                                        if value.translation.width <= 200 {
+//                                                            dragTranslation = CGSize.zero
+//                                                        }
+//                                                    dragging = false
+//                                                })
+//
+//                                    )
+//                                    .animation(.spring(response: 2, dampingFraction: 0.3, blendDuration: 0.3), value: true)
+//                                    .edgesIgnoringSafeArea(.bottom)
+//
+//
+//                                if dragTranslation.width <= 200 {
+//                                    Text("today")
+//                                } else {
+//                                    Text("tomorrow")
+//                                }
+//
+//                            }
+//                        }.offset(x: 0, y: 500)
+                        //.offset(x: 0, y: 200)
+//                        Spacer()
+                        
                     }
                     
                    
-                        Spacer()
+                      
                     
                     
                     
-                    
+                    Spacer()
                     
 
+                    
                     HStack {
                         Spacer()
 
@@ -386,7 +453,6 @@ struct ContentView: View {
                         }
 
                     }
-
                     
                     
                     
@@ -397,11 +463,130 @@ struct ContentView: View {
                 viewModel.fetchWeather(city: selectedCity.city)
             })
             
+            if addButtonTapped != true {
+            
+                ZStack {
+                    
+                    
+                    
+                    Circle()
+                        
+                        .stroke(style:  StrokeStyle(
+                            lineWidth: 3,
+                            lineCap: .round,
+                            dash: [10]
+
+                        ))
+                        
+             
+                       
+                        .scale(1.5)
+                        
+                     
+                        .rotationEffect(Angle(degrees: Double(self.dragTranslation.width/10)), anchor: .center)
+                        
+                        
+                        .animation(.spring(response: 2, dampingFraction: 0.3, blendDuration: 0.3), value: true)
+                        .edgesIgnoringSafeArea(.bottom)
+                        .offset(y: 375)
+                        .gesture(DragGesture()
+                        .onChanged({ (value) in
+                            dragTranslation = value.translation
+                            print(value.translation.width)
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            dragging = true
+                        })
+                        .onEnded({ (value) in
+                                if value.translation.width <= 200 {
+                                    dragTranslation = CGSize.zero
+                                }
+                            dragging = false
+                        })
+                    )
+                    
+                    Circle()
+                        .scale(1.489)
+                        .fill(Color(#colorLiteral(red: 0.9371728301, green: 0.9373074174, blue: 0.9371433854, alpha: 1)))
+                        
+    
+                        .offset(y: 375)
+                        .gesture(DragGesture()
+                        .onChanged({ (value) in
+                            dragTranslation = value.translation
+                            print(value.translation.width)
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            dragging = true
+                        })
+                        .onEnded({ (value) in
+                                if value.translation.width <= 200 {
+                                    dragTranslation = CGSize.zero
+                                }
+                            dragging = false
+                        })
+                    )
+                     
+               
+                    
+                }
+               
+    
+    
+                    
+//                    Circle()
+//
+//                    .stroke(style: StrokeStyle(lineWidth: 1, lineCap: .round,
+//                                               dash: [20]))
+//                    .scale(1.5)
+//                        .offset(y: 375)
+//                        .gesture(DragGesture()
+//                                    .onChanged({ (value) in
+//                                        dragTranslation = value.translation
+//                                        print(value.translation.width)
+//                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+//                                        dragging = true
+//                                    })
+//                                    .onEnded({ (value) in
+//        //                                        if value.translation.width <= 200 {
+//        //                                            dragTranslation = CGSize.zero
+//        //                                        }
+//                                        dragging = false
+//                                    }))
+//
+//                        .rotationEffect(Angle(degrees: Double(self.dragTranslation.width)), anchor: .center)
+                    
+//                    RoundedRectangle(cornerRadius: 15)
+//                        .fill(Color.white)
+//                        .frame(width: 75, height: 35)
+//                        .shadow(color: Color.black.opacity(0.3), radius: 3, x: 0, y: 0)
+//                        .overlay(
+//                            HStack {
+//                                Text("<")
+//                                    .fontWeight(.semibold)
+//                                Spacer()
+//                                Text(">")
+//                                    .fontWeight(.semibold)
+//                            }.padding(.horizontal)
+//                        )
+//                        .offset(x: 0, y: 80)
+                        
+                }
+                
+             
+                
+                
+         
+                
+
+            }
+            
         }
         
-    }
-    
 
+        
+       
+        
+        
+    
     
 }
 
@@ -474,3 +659,5 @@ func returnWeatherColor(id: Int) -> Gradient {
         return ColorPalettes[0]
     }
 }
+
+
