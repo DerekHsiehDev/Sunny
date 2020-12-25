@@ -11,17 +11,28 @@ struct Cities: Hashable {
     
     var city: String
     var country: String
+  
     
     init(city: String, country: String) {
         self.city = city
         self.country = country
+     
     }
 }
 
-var cities = [
-    Cities(city: "Corona", country: "California")
+
+
+
+
+    var cities = [
+        Cities(city: "Corona", country: "United States")
+        
+    ]
+
+var temps = [String: Int]()
+
     
-]
+    
 
 
 
@@ -29,11 +40,15 @@ var cities = [
 
 struct ContentView: View {
     @State var addButtonTapped = false
-    @State var searchText = ""
-    let weatherModel = WeatherModel()
-    @ObservedObject var viewModel = WeatherViewModel()
-
     
+    @State var searchText = ""
+    @State var selectedCity = cities.first!
+    @ObservedObject var fetcher = CityFetcher()
+
+
+   @ObservedObject public var viewModel = WeatherViewModel()
+
+
     var body: some View {
         ZStack {
             Color(#colorLiteral(red: 0.9371728301, green: 0.9373074174, blue: 0.9371433854, alpha: 1))
@@ -44,15 +59,18 @@ struct ContentView: View {
                 VStack {
                     
                     Button(action: {addButtonTapped.toggle()
-                    
+                        
+                        print(selectedCity.city)
+                        
+                        viewModel.fetchWeather(city: selectedCity.city)
                     }) {
                         
                         HStack {
                             Spacer()
-                            Text(addButtonTapped ? "add" : "Corona,")
+                            Text(addButtonTapped ? "add" : "\(selectedCity.city),")
                                 .fontWeight(addButtonTapped ? .light : .bold)
                                 .foregroundColor(.black)
-                            Text(addButtonTapped ? "city" : "USA")
+                            Text(addButtonTapped ? "city" : "\(selectedCity.country)")
                                 .fontWeight(addButtonTapped ? .bold : .light)
                                 .foregroundColor(.black)
                             
@@ -64,7 +82,105 @@ struct ContentView: View {
                     
                     if addButtonTapped {
                         
-                        CitiesCard()
+                        VStack {
+                            VStack {
+                                
+                                HStack {
+                                    TextField("search city here", text: $searchText)
+                                    
+                                    
+                                    
+                                }
+                                .padding()
+                                
+                                .background(Color(#colorLiteral(red: 0.9999127984, green: 1, blue: 0.9998814464, alpha: 1)))
+                                .cornerRadius(17)
+                                .frame(width: UIScreen.main.bounds.width - 60, height: 100)
+                                
+                                ZStack {
+                                    ScrollView {
+                                        ForEach(cities, id: \.self) { city in
+                                            HStack {
+                                                
+                                                Text("\(city.city), ")
+                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                    .fontWeight(.bold)
+                                                    
+                                                    .padding(.leading, 40)
+                                                Text("\(city.country)")
+                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                Spacer()
+                                                
+                                                CityTemperatureText(searchText: $searchText, city: city.city)
+                                            }
+                                            .onAppear {
+                                                getWeatherOfCity(city: city.city)
+                                            }
+                            
+                                            .onTapGesture {
+                                                selectedCity = city
+                                            
+                                                self.viewModel.fetchWeather(city: (city.city as NSString).replacingOccurrences(of: " ", with: "+"))
+                                                
+                                                addButtonTapped = false
+                                            }
+                                            .padding(.bottom, 70)
+                                            
+                                            Spacer()
+                                            
+                                            
+                                            
+                                            
+                                        }.padding(.top, 30)
+                                    }
+                                    
+                                    if searchText.count >= 3 {
+                                        ScrollView {
+                                            ForEach(fetcher.cities.filter({"\($0)".contains(searchText)}), id: \.self) { city in
+                                                
+                                                
+                                                HStack {
+                                                    Text("\(city.city ?? ""), \(city.country ?? "")")
+                                                        .foregroundColor(.white)
+                                                    Spacer()
+                                                        
+                                                        
+                                                        .padding()
+                                                }
+                                                .background(Color.black)
+                                                .padding(.horizontal, 40)
+                                                .onTapGesture {
+                                                    searchText = ""
+                                                    
+                                                    cities.append(Cities(city: city.city!, country: city.country!))
+                                                    
+                                                }
+                                                Divider()
+                                                    .background(Color(.systemGray4))
+                                                    .padding(.leading, 40)
+                                                
+                                                
+                                            }
+                                        }
+                                        
+                                    }
+                                }
+                                
+                                
+                                
+                                Spacer()
+                            }
+                            //            .padding(.top, 50)
+                            
+                        }
+                        .frame(width: UIScreen.main.bounds.width - 15, height: 600)
+                        .transition(AnyTransition.opacity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 25)
+                                
+                                //                .padding(.top, 50)
+                                .padding(.horizontal, 10)
+                        )
                     } else {
                         
                         
@@ -104,7 +220,7 @@ struct ContentView: View {
                                 
                                 Spacer()
                                 
-                                Text("\(viewModel.temp)°")
+                                Text("\((viewModel.currentTemp) ?? 0)°")
                                     .foregroundColor(.white)
                                     .font(.system(size: 75, weight: .bold, design: .default))
                                     .padding(.horizontal)
@@ -124,7 +240,7 @@ struct ContentView: View {
                                 Spacer()
                           
                                     
-                                Text("feels like: \(viewModel.feels_like)°")
+                                Text("feels like: \((viewModel.currentTemp) ?? 0)°")
                                         .foregroundColor(.white)
                                         .font(.system(size: 15, weight: .bold, design: .default))
                                         .padding(.horizontal)
@@ -149,15 +265,15 @@ struct ContentView: View {
                         HStack {
                             
                             VStack() {
-                                Text("aqi")
-                                    .font(.system(size: 15, weight: .semibold, design: .default))
+                                Text("humidity")
+                                    .font(.system(size: 12, weight: .semibold, design: .default))
                                     .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
                                     .padding()
 //
 //                                Spacer()
                                 
-                                Text("\(65)")
-                                    .font(.system(size: 25, weight: .bold, design: .default))
+                                Text("\(viewModel.currentWeather?.main.humidity ?? 0)")
+                                    .font(.system(size: 23, weight: .bold, design: .default))
                                     .foregroundColor(Color(#colorLiteral(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479, alpha: 1)))
                                     .padding()
                                 
@@ -174,12 +290,14 @@ struct ContentView: View {
 //                                Spacer()
                                 
                                 HStack(spacing: 5) {
-                                    Text("\(23)")
-                                        .font(.system(size: 25, weight: .bold, design: .default))
+                                    Text("\(Int(viewModel.currentWeather?.wind.speed ?? 0))")
+                                        .font(.system(size: 23, weight: .bold, design: .default))
                                         .foregroundColor(Color(.black))
                                         
                                     Text("mph")
-                                        .font(.caption)
+                                        .font(.caption2)
+                                        .lineLimit(1)
+                                      
                                         .foregroundColor(Color(#colorLiteral(red: 0.4431372549, green: 0.431372549, blue: 0.431372549, alpha: 1)))
                                 }.padding()
                                 
@@ -195,8 +313,8 @@ struct ContentView: View {
                                 
 //                                Spacer()
                                 
-                                Text("\(77)°")
-                                    .font(.system(size: 25, weight: .bold, design: .default))
+                                Text("\(viewModel.currentTempMax ?? 0)°")
+                                    .font(.system(size: 23, weight: .bold, design: .default))
                                     .foregroundColor(Color(#colorLiteral(red: 0.7215686275, green: 0.3529411765, blue: 1, alpha: 1)))
                                     .padding()
                                 
@@ -210,8 +328,8 @@ struct ContentView: View {
                                 
 //                                Spacer()
                                 
-                                Text("\(65)°")
-                                    .font(.system(size: 25, weight: .bold, design: .default))
+                                Text("\(viewModel.currentTempMin ?? 0)°")
+                                    .font(.system(size: 23, weight: .bold, design: .default))
                                     .foregroundColor(Color(#colorLiteral(red: 0.9098039216, green: 0.6549019608, blue: 0.1725490196, alpha: 1)))
                                     .padding()
                             }
@@ -260,15 +378,23 @@ struct ContentView: View {
                 }
             }
             .onAppear(perform: {
-                weatherModel.getOneTimeWeather(city: cities.first!.city)
-               
+                
+                viewModel.fetchWeather(city: selectedCity.city)
             })
             
         }
         
     }
     
+    func getWeatherOfCity(city: String) {
+        temps[city] = viewModel.fetchOneCityWeather(city: (city as NSString).replacingOccurrences(of: " ", with: "+"))
+  
+      
+    }
+    
 }
+
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
@@ -276,104 +402,31 @@ struct ContentView_Previews: PreviewProvider {
     }
 }
 
-struct CitiesCard: View {
-    @State var searchText = ""
-    @ObservedObject var fetcher = CityFetcher()
-    
-    
+//struct CitiesCard: View {
+//
+//
+//    @Binding var selectedCity: Cities
+//  @ObservedObject private var viewModel = WeatherViewModel()
+//    @Binding var addButtonTapped: Bool
+//
+//    var body: some View {
+//
+//    }
+//}
+
+
+
+struct CityTemperatureText: View {
+    @Binding var searchText: String
+    let city: String
     var body: some View {
-        VStack {
-            VStack {
-                
-                HStack {
-                    TextField("search city here", text: $searchText)
-                    
-                    
-                    
-                }
-                .padding()
-                
-                .background(Color(#colorLiteral(red: 0.9999127984, green: 1, blue: 0.9998814464, alpha: 1)))
-                .cornerRadius(17)
-                .frame(width: UIScreen.main.bounds.width - 60, height: 100)
-                
-                ZStack {
-                    ScrollView {
-                        ForEach(cities, id: \.self) { city in
-                            HStack {
-                                Text("\(city.city), ")
-                                    .foregroundColor(searchText.isEmpty ? .white : .black)
-                                    .fontWeight(.bold)
-                                    
-                                    .padding(.leading, 40)
-                                Text("\(city.country)")
-                                    .foregroundColor(searchText.isEmpty ? .white : .black)
-                                Spacer()
-                                
-                                Text("\(59)°")
-                                    .foregroundColor(searchText.isEmpty ? .white : .black)
-                                    .fontWeight(.bold)
-                                    .font(.title3)
-                                    .padding(.trailing, 40)
-                            }
-                            .padding(.bottom, 70)
-                            
-                            Spacer()
-                            
-                            
-                            
-                            
-                        }.padding(.top, 30)
-                    }
-                    
-                    if searchText.count >= 3 {
-                        ScrollView {
-                            ForEach(fetcher.cities.filter({"\($0)".contains(searchText)}), id: \.self) { city in
-                                
-                                
-                                HStack {
-                                    Text("\(city.city ?? ""), \(city.country ?? "")")
-                                        .foregroundColor(.white)
-                                    Spacer()
-                                        
-                                        
-                                        .padding()
-                                }
-                                .background(Color.black)
-                                .padding(.horizontal, 40)
-                                .onTapGesture {
-                                    searchText = ""
-                                    
-                                    cities.append(Cities(city: city.city!, country: city.country!))
-                                    
-                                }
-                                Divider()
-                                    .background(Color(.systemGray4))
-                                    .padding(.leading, 40)
-                                
-                                
-                            }
-                        }
-                        
-                    }
-                }
-                
-                
-                
-                Spacer()
+        Text("\(temps[city] ?? 0)°")
+            .foregroundColor(searchText.isEmpty ? .white : .black)
+            .fontWeight(.bold)
+            .font(.title3)
+            .padding(.trailing, 40)
+            .onAppear {
+            print(temps)
             }
-            //            .padding(.top, 50)
-            
-        }
-        .frame(width: UIScreen.main.bounds.width - 15, height: 600)
-        .transition(AnyTransition.opacity)
-        .background(
-            RoundedRectangle(cornerRadius: 25)
-                
-                //                .padding(.top, 50)
-                .padding(.horizontal, 10)
-        )
     }
 }
-
-
