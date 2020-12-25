@@ -42,6 +42,7 @@ struct ContentView: View {
     @State var searchText = ""
     @State var selectedCity = cities.first!
     @ObservedObject var fetcher = CityFetcher()
+    @State var keyboardInUse = false
 //    @State var temps = [String: Int]()
 
    @ObservedObject public var viewModel = WeatherViewModel()
@@ -89,6 +90,9 @@ struct ContentView: View {
                                     
                                     
                                 }
+                                .onTapGesture {
+                                    keyboardInUse = true
+                                }
                                 .padding()
                                 
                                 .background(Color(#colorLiteral(red: 0.9999127984, green: 1, blue: 0.9998814464, alpha: 1)))
@@ -125,6 +129,7 @@ struct ContentView: View {
                                                 self.viewModel.fetchWeather(city: (city.city as NSString).replacingOccurrences(of: " ", with: "+"))
                                                 
                                                 addButtonTapped = false
+                                                
                                             }
                                             .padding(.bottom, 70)
                                             
@@ -153,6 +158,8 @@ struct ContentView: View {
                                                 .padding(.horizontal, 40)
                                                 .onTapGesture {
                                                     searchText = ""
+                                                    keyboardInUse = false
+                                                    self.hideKeyboard()
                                                     
                                                     cities.append(Cities(city: city.city!, country: city.country!))
                                                     
@@ -175,7 +182,7 @@ struct ContentView: View {
                             //            .padding(.top, 50)
                             
                         }
-                        .frame(width: UIScreen.main.bounds.width - 15, height: 600)
+                        .frame(width: UIScreen.main.bounds.width - 15, height: keyboardInUse ? 450 : 600)
                         .transition(AnyTransition.opacity)
                         .background(
                             RoundedRectangle(cornerRadius: 25)
@@ -345,17 +352,21 @@ struct ContentView: View {
                         
                     }
                     
-                    Spacer()
+                   
+                        Spacer()
                     
                     
                     
+                    
+                    
+
                     HStack {
                         Spacer()
-                        
+
                         Button(action: {
-                            
+
                             addButtonTapped.toggle()
-                            
+
                         }) {
                             Circle()
                                 .fill(addButtonTapped ? .black : Color.white)
@@ -366,14 +377,14 @@ struct ContentView: View {
                                     Image(systemName: "xmark")
                                         .foregroundColor(Color( addButtonTapped ? .white : #colorLiteral(red: 0.7450370193, green: 0.7255315781, blue: 0.7254028916, alpha: 1)) )
                                         .font(.system(size: 35, weight: .bold, design: .rounded))
-                                        
+
                                         .rotationEffect(.degrees(addButtonTapped ? 0 : 135))
                                 )
                                 .animation(.easeInOut)
                         }
-                        
+
                     }
-                    
+
                     
                     
                     
@@ -415,3 +426,11 @@ struct ContentView_Previews: PreviewProvider {
 
 
 
+
+#if canImport(UIKit)
+extension View {
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+#endif
