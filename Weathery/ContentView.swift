@@ -29,8 +29,6 @@ struct Cities: Hashable {
         
     ]
 
-var temps = [String: Int]()
-
     
     
 
@@ -44,7 +42,7 @@ struct ContentView: View {
     @State var searchText = ""
     @State var selectedCity = cities.first!
     @ObservedObject var fetcher = CityFetcher()
-
+//    @State var temps = [String: Int]()
 
    @ObservedObject public var viewModel = WeatherViewModel()
 
@@ -111,11 +109,15 @@ struct ContentView: View {
                                                     .foregroundColor(searchText.isEmpty ? .white : .black)
                                                 Spacer()
                                                 
-                                                CityTemperatureText(searchText: $searchText, city: city.city)
+//                                                Text("\(0)°")
+//                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+//                                                    .fontWeight(.bold)
+//                                                    .font(.title3)
+//                                                    .padding(.trailing, 40)
                                             }
-                                            .onAppear {
-                                                getWeatherOfCity(city: city.city)
-                                            }
+//                                            .onAppear {
+//                                                viewModel.fetchOneCityWeather(city: city.city.lowercased())
+//                                            }
                             
                                             .onTapGesture {
                                                 selectedCity = city
@@ -386,11 +388,7 @@ struct ContentView: View {
         
     }
     
-    func getWeatherOfCity(city: String) {
-        temps[city] = viewModel.fetchOneCityWeather(city: (city as NSString).replacingOccurrences(of: " ", with: "+"))
-  
-      
-    }
+
     
 }
 
@@ -416,17 +414,4 @@ struct ContentView_Previews: PreviewProvider {
 
 
 
-struct CityTemperatureText: View {
-    @Binding var searchText: String
-    let city: String
-    var body: some View {
-        Text("\(temps[city] ?? 0)°")
-            .foregroundColor(searchText.isEmpty ? .white : .black)
-            .fontWeight(.bold)
-            .font(.title3)
-            .padding(.trailing, 40)
-            .onAppear {
-            print(temps)
-            }
-    }
-}
+
