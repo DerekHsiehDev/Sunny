@@ -60,7 +60,7 @@ struct ContentView: View {
                     Button(action: {addButtonTapped.toggle()
                         
                         print(selectedCity.city)
-                        
+                        keyboardInUse = false
                         viewModel.fetchWeather(city: selectedCity.city)
                     }) {
                         
@@ -101,44 +101,46 @@ struct ContentView: View {
                                 
                                 ZStack {
                                     ScrollView {
-                                        ForEach(cities, id: \.self) { city in
-                                            HStack {
-                                                
-                                                Text("\(city.city), ")
-                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
-                                                    .fontWeight(.bold)
+                                       
+                                            ForEach(cities, id: \.self) { city in
+                                                HStack {
                                                     
-                                                    .padding(.leading, 40)
-                                                Text("\(city.country)")
-                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                    Text("\(city.city), ")
+                                                        .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                        .fontWeight(.bold)
+                                                        
+                                                        .padding(.leading, 40)
+                                                    Text("\(city.country)")
+                                                        .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                    Spacer()
+                                                    
+    //                                                Text("\(0)°")
+    //                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+    //                                                    .fontWeight(.bold)
+    //                                                    .font(.title3)
+    //                                                    .padding(.trailing, 40)
+                                                }
+    //                                            .onAppear {
+    //                                                viewModel.fetchOneCityWeather(city: city.city.lowercased())
+    //                                            }
+                                
+                                                .onTapGesture {
+                                                    selectedCity = city
+                                                
+                                                    self.viewModel.fetchWeather(city: (city.city as NSString).replacingOccurrences(of: " ", with: "+"))
+                                                    
+                                                    addButtonTapped = false
+                                                    
+                                                }
+                                                .padding(.bottom, 70)
+                                                
                                                 Spacer()
                                                 
-//                                                Text("\(0)°")
-//                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
-//                                                    .fontWeight(.bold)
-//                                                    .font(.title3)
-//                                                    .padding(.trailing, 40)
-                                            }
-//                                            .onAppear {
-//                                                viewModel.fetchOneCityWeather(city: city.city.lowercased())
-//                                            }
-                            
-                                            .onTapGesture {
-                                                selectedCity = city
-                                            
-                                                self.viewModel.fetchWeather(city: (city.city as NSString).replacingOccurrences(of: " ", with: "+"))
                                                 
-                                                addButtonTapped = false
                                                 
-                                            }
-                                            .padding(.bottom, 70)
-                                            
-                                            Spacer()
-                                            
-                                            
-                                            
-                                            
-                                        }.padding(.top, 30)
+                                                
+                                            }.padding(.top, 30)
+                                        
                                     }
                                     
                                     if searchText.count >= 3 {
@@ -217,7 +219,7 @@ struct ContentView: View {
                             
                             
                             HStack(alignment: .center) {
-                                Image(systemName: "cloud.heavyrain.fill")
+                                Image(systemName: "\(returnWeatherIcon(id: viewModel.currentWeather?.weather.first?.id ?? -1))")
                                     
                                     .font(.system(size: 75))
                                     
@@ -239,7 +241,7 @@ struct ContentView: View {
                             
                             
                             HStack(alignment: .center) {
-                                Text("heavy rain")
+                                Text("\(viewModel.currentWeather?.weather.first!.description ?? "clear")")
                                     .foregroundColor(.white)
                                     .font(.system(size: 25, weight: .semibold, design: .rounded))
                                     
@@ -266,7 +268,7 @@ struct ContentView: View {
                         .frame(width: UIScreen.main.bounds.width - 45, height: 200)
                         .background(
                             RoundedRectangle(cornerRadius: 17)
-                                .fill(LinearGradient(gradient: Gradient(colors: [Color(#colorLiteral(red: 0.4078431373, green: 0.7411764706, blue: 0.9803921569, alpha: 1)), Color(#colorLiteral(red: 0.2745098039, green: 0.5098039216, blue: 0.9921568627, alpha: 1))]), startPoint: .top, endPoint: .bottom))
+                                .fill(LinearGradient(gradient: returnWeatherColor(id: (viewModel.currentWeather?.weather.first?.id) ?? -1), startPoint: .top, endPoint: .bottom))
                                 .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0.0, y: 0.0)
                             
                         ).padding(.bottom, 15)
@@ -366,7 +368,7 @@ struct ContentView: View {
                         Button(action: {
 
                             addButtonTapped.toggle()
-
+                            keyboardInUse = false
                         }) {
                             Circle()
                                 .fill(addButtonTapped ? .black : Color.white)
@@ -434,3 +436,41 @@ extension View {
     }
 }
 #endif
+
+func returnWeatherIcon(id: Int) -> String {
+    switch id {
+    case 200...232:
+        return "cloud.bolt.rain.fill"
+    case 300...321:
+        return "cloud.drizzle.fill"
+    case 500...531:
+        return "cloud.heavyrain.fill"
+    case 600...622:
+        return "cloud.snow.fill"
+    case 800:
+       return "cloud"
+    case 801...804:
+        return "cloud.fill"
+    default:
+        return "sun.max.fill"
+    }
+}
+
+func returnWeatherColor(id: Int) -> Gradient {
+    switch id {
+    case 200...232:
+        return ColorPalettes[0]
+    case 300...321:
+        return ColorPalettes[0]
+    case 500...531:
+        return ColorPalettes[0]
+    case 600...622:
+        return ColorPalettes[0]
+    case 800:
+        return ColorPalettes[0]
+    case 801...804:
+        return ColorPalettes[0]
+    default:
+        return ColorPalettes[0]
+    }
+}
