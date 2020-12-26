@@ -89,7 +89,7 @@ struct ContentView: View {
                         .gesture(DragGesture()
                         .onChanged({ (value) in
                             dragTranslation = value.translation
-                            print(value.translation.width)
+                     
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             dragging = true
                         })
@@ -99,6 +99,8 @@ struct ContentView: View {
                                 }
                             dragging = false
                         })
+                                 
+                               
                     )
                     
                     Circle()
@@ -110,7 +112,7 @@ struct ContentView: View {
                         .gesture(DragGesture()
                         .onChanged({ (value) in
                             dragTranslation = value.translation
-                            print(value.translation.width)
+//                            print(value.translation.width)
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             dragging = true
                         })
@@ -121,6 +123,9 @@ struct ContentView: View {
                             dragging = false
                         })
                     )
+                    
+                    Text("\(viewModel.timezone_offset ?? 0)")
+                        .offset(y: 375)
                      
                
                     
@@ -203,13 +208,14 @@ struct ContentView: View {
                                 
                                 HStack {
                                     TextField("search city here", text: $searchText)
+                                        .onTapGesture {
+                                            keyboardInUse = true
+                                        }
                                     
                                     
                                     
                                 }
-                                .onTapGesture {
-                                    keyboardInUse = true
-                                }
+                               
                                 .padding()
                                 
                                 .background(Color(#colorLiteral(red: 0.9999127984, green: 1, blue: 0.9998814464, alpha: 1)))
@@ -569,6 +575,8 @@ struct ContentView: View {
             .onAppear(perform: {
                 
                 viewModel.fetchWeather(city: selectedCity.city)
+                
+                
             })
             
             
@@ -580,6 +588,7 @@ struct ContentView: View {
                 
 
             }
+    
             
         }
         

@@ -8,6 +8,7 @@
 import Foundation
 
 struct WeatherData: Decodable {
+    
     let name: String
     
     let main: Main
@@ -15,6 +16,13 @@ struct WeatherData: Decodable {
     let wind: Wind
     
     let weather: [Weather]
+    
+    let coord: Coord
+}
+
+struct Coord: Decodable {
+    let long: Double?
+    let lat: Double?
 }
 
 
@@ -34,5 +42,15 @@ struct Main: Decodable {
 
 struct Wind: Decodable {
     let speed: Double
+}
+
+struct HourlyWeatherData: Decodable {
+    let hourly: [Hourly]
+    let timezone_offset: Int
+}
+
+struct Hourly: Decodable {
+    let dt: Int
+    let temp: Double
 }
 
