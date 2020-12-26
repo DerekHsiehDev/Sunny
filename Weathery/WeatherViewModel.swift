@@ -21,6 +21,7 @@ class WeatherViewModel: ObservableObject {
     
     private let url = "https://api.openweathermap.org/data/2.5/weather?appid=0ee7d97922c36d02d116dfbac3159fab&q="
     private var cancellable: AnyCancellable?
+    private let oneUrl = "https://api.openweathermap.org/data/2.5/onecall?appid=0ee7d97922c36d02d116dfbac3159fab&lat="
     
     public func fetchWeather(city: String) {
         
@@ -47,6 +48,10 @@ class WeatherViewModel: ObservableObject {
                 }
             }
         
+    }
+    
+    public func fetchHourlyWeather(lat: Float, long: Float) {
+        let urlSTr = URL(string: oneUrl + "\(lat)&lon=\(long)&exclude=current,minutely,daily,alerts")
     }
     
     
