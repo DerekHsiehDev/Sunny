@@ -11,12 +11,12 @@ struct Cities: Hashable {
     
     var city: String
     var country: String
-  
+    
     
     init(city: String, country: String) {
         self.city = city
         self.country = country
-     
+        
     }
 }
 
@@ -24,13 +24,13 @@ struct Cities: Hashable {
 
 
 
-    var cities = [
-        Cities(city: "Corona", country: "United States")
-        
-    ]
+var cities = [
+    Cities(city: "Corona", country: "United States")
+    
+]
 
-    
-    
+
+
 
 
 
@@ -38,12 +38,12 @@ struct Cities: Hashable {
 
 struct ContentView: View {
     @State var addButtonTapped = false
-    
+    @State var hourlyTemps = [Hourly]()
     @State var searchText = ""
     @State var selectedCity = cities.first!
     @ObservedObject var fetcher = CityFetcher()
     @State var keyboardInUse = false
-//    @State var temps = [String: Int]()
+    //    @State var temps = [String: Int]()
     
     //circle view
     let circleWidth: CGFloat = 300 //UIScreen.main.bounds.width + 300
@@ -51,131 +51,20 @@ struct ContentView: View {
     @State var rotateState: Double = 0
     @State var dragTranslation = CGSize.zero
     @State private var dragging = false
-
-   @ObservedObject public var viewModel = WeatherViewModel()
-
-
+    @State var showNextWeek = false
+    
+    @ObservedObject public var viewModel = WeatherViewModel()
+    
+    
     var body: some View {
         ZStack {
             Color(#colorLiteral(red: 0.9371728301, green: 0.9373074174, blue: 0.9371433854, alpha: 1))
                 .edgesIgnoringSafeArea(.all)
             
-            if addButtonTapped != true {
             
-                ZStack {
-                    
-                    
-                    
-                    Circle()
-                        
-                        .stroke(style:  StrokeStyle(
-                            lineWidth: 3,
-                            lineCap: .round,
-                            dash: [10]
-
-                        ))
-                        
-             
-                       
-                        .scale(1.5)
-                        
-                     
-                        .rotationEffect(Angle(degrees: Double(self.dragTranslation.width/10)), anchor: .center)
-                        
-                        
-                        .animation(.spring(response: 2, dampingFraction: 0.3, blendDuration: 0.3), value: true)
-                        .edgesIgnoringSafeArea(.bottom)
-                        .offset(y: 375)
-                        .gesture(DragGesture()
-                        .onChanged({ (value) in
-                            dragTranslation = value.translation
-                     
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            dragging = true
-                        })
-                        .onEnded({ (value) in
-                                if value.translation.width <= 200 {
-                                    dragTranslation = CGSize.zero
-                                }
-                            dragging = false
-                        })
-                                 
-                               
-                    )
-                    
-                    Circle()
-                        .scale(1.489)
-                        .fill(Color(#colorLiteral(red: 0.9371728301, green: 0.9373074174, blue: 0.9371433854, alpha: 1)))
-                        
-    
-                        .offset(y: 375)
-                        .gesture(DragGesture()
-                        .onChanged({ (value) in
-                            dragTranslation = value.translation
-//                            print(value.translation.width)
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            dragging = true
-                        })
-                        .onEnded({ (value) in
-                                if value.translation.width <= 200 {
-                                    dragTranslation = CGSize.zero
-                                }
-                            dragging = false
-                        })
-                    )
-                    
-                    Text("\(viewModel.timezone_offset ?? 0)")
-                        .offset(y: 375)
-                     
-               
-                    
-                }
-               
-    
-    
-                    
-//                    Circle()
-//
-//                    .stroke(style: StrokeStyle(lineWidth: 1, lineCap: .round,
-//                                               dash: [20]))
-//                    .scale(1.5)
-//                        .offset(y: 375)
-//                        .gesture(DragGesture()
-//                                    .onChanged({ (value) in
-//                                        dragTranslation = value.translation
-//                                        print(value.translation.width)
-//                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-//                                        dragging = true
-//                                    })
-//                                    .onEnded({ (value) in
-//        //                                        if value.translation.width <= 200 {
-//        //                                            dragTranslation = CGSize.zero
-//        //                                        }
-//                                        dragging = false
-//                                    }))
-//
-//                        .rotationEffect(Angle(degrees: Double(self.dragTranslation.width)), anchor: .center)
-                    
-//                    RoundedRectangle(cornerRadius: 15)
-//                        .fill(Color.white)
-//                        .frame(width: 75, height: 35)
-//                        .shadow(color: Color.black.opacity(0.3), radius: 3, x: 0, y: 0)
-//                        .overlay(
-//                            HStack {
-//                                Text("<")
-//                                    .fontWeight(.semibold)
-//                                Spacer()
-//                                Text(">")
-//                                    .fontWeight(.semibold)
-//                            }.padding(.horizontal)
-//                        )
-//                        .offset(x: 0, y: 80)
-                        
-                }
             
-   
             VStack(alignment: .center) {
-       
+                
                 
                 VStack {
                     
@@ -215,7 +104,7 @@ struct ContentView: View {
                                     
                                     
                                 }
-                               
+                                
                                 .padding()
                                 
                                 .background(Color(#colorLiteral(red: 0.9999127984, green: 1, blue: 0.9998814464, alpha: 1)))
@@ -224,45 +113,45 @@ struct ContentView: View {
                                 
                                 ZStack {
                                     ScrollView {
-                                       
-                                            ForEach(cities, id: \.self) { city in
-                                                HStack {
-                                                    
-                                                    Text("\(city.city), ")
-                                                        .foregroundColor(searchText.isEmpty ? .white : .black)
-                                                        .fontWeight(.bold)
-                                                        
-                                                        .padding(.leading, 40)
-                                                    Text("\(city.country)")
-                                                        .foregroundColor(searchText.isEmpty ? .white : .black)
-                                                    Spacer()
-                                                    
-    //                                                Text("\(0)°")
-    //                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
-    //                                                    .fontWeight(.bold)
-    //                                                    .font(.title3)
-    //                                                    .padding(.trailing, 40)
-                                                }
-    //                                            .onAppear {
-    //                                                viewModel.fetchOneCityWeather(city: city.city.lowercased())
-    //                                            }
-                                
-                                                .onTapGesture {
-                                                    selectedCity = city
+                                        
+                                        ForEach(cities, id: \.self) { city in
+                                            HStack {
                                                 
-                                                    self.viewModel.fetchWeather(city: (city.city as NSString).replacingOccurrences(of: " ", with: "+"))
+                                                Text("\(city.city), ")
+                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                    .fontWeight(.bold)
                                                     
-                                                    addButtonTapped = false
-                                                    
-                                                }
-                                                .padding(.bottom, 70)
-                                                
+                                                    .padding(.leading, 40)
+                                                Text("\(city.country)")
+                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
                                                 Spacer()
                                                 
+                                                //                                                Text("\(0)°")
+                                                //                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                //                                                    .fontWeight(.bold)
+                                                //                                                    .font(.title3)
+                                                //                                                    .padding(.trailing, 40)
+                                            }
+                                            //                                            .onAppear {
+                                            //                                                viewModel.fetchOneCityWeather(city: city.city.lowercased())
+                                            //                                            }
+                                            
+                                            .onTapGesture {
+                                                selectedCity = city
                                                 
+                                                self.viewModel.fetchWeather(city: (city.city as NSString).replacingOccurrences(of: " ", with: "+"))
                                                 
+                                                addButtonTapped = false
                                                 
-                                            }.padding(.top, 30)
+                                            }
+                                            .padding(.bottom, 70)
+                                            
+                                            Spacer()
+                                            
+                                            
+                                            
+                                            
+                                        }.padding(.top, 30)
                                         
                                     }
                                     
@@ -307,7 +196,7 @@ struct ContentView: View {
                             //            .padding(.top, 50)
                             
                         }
-                        .frame(width: UIScreen.main.bounds.width - 15, height: keyboardInUse ? 450 : 600)
+                        .frame(width: UIScreen.main.bounds.width - 15, height: keyboardInUse ? 450 : UIScreen.main.bounds.height - 300)
                         .transition(AnyTransition.opacity)
                         .background(
                             RoundedRectangle(cornerRadius: 25)
@@ -319,26 +208,6 @@ struct ContentView: View {
                         
                         
                         VStack {
-                            
-                            
-                            
-                            //                                VStack(alignment: .leading) {
-                            //
-                            //                                    Image(systemName: "cloud.heavyrain.fill")
-                            //
-                            //                                        .font(.system(size: 75))
-                            //
-                            //                                        .foregroundColor(.white)
-                            //
-                            //
-                            //                                        .padding(.horizontal)
-                            //                                        .padding(.top, 30)
-                            //
-                            //
-                            
-                            //
-                            //                                }
-                            //
                             
                             
                             HStack(alignment: .center) {
@@ -366,19 +235,20 @@ struct ContentView: View {
                             HStack(alignment: .center) {
                                 Text("\(viewModel.currentWeather?.weather.first!.description ?? "clear")")
                                     .foregroundColor(.white)
-                                    .font(.system(size: 25, weight: .semibold, design: .rounded))
-                                    
+                                    .fontWeight(.bold)
+                                    .font(.title)
+                                    .minimumScaleFactor(0.7)
                                     .padding(.horizontal)
                                     .padding(.bottom, 15)
                                 
                                 Spacer()
-                          
-                                    
+                                
+                                
                                 Text("feels like: \((viewModel.currentTemp) ?? 0)°")
-                                        .foregroundColor(.white)
-                                        .font(.system(size: 15, weight: .bold, design: .default))
-                                        .padding(.horizontal)
-                                        .padding(.bottom, 15)
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 15, weight: .bold, design: .default))
+                                    .padding(.horizontal)
+                                    .padding(.bottom, 15)
                                 
                                 
                             }
@@ -394,7 +264,9 @@ struct ContentView: View {
                                 .fill(LinearGradient(gradient: returnWeatherColor(id: (viewModel.currentWeather?.weather.first?.id) ?? -1), startPoint: .top, endPoint: .bottom))
                                 .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0.0, y: 0.0)
                             
+                            
                         ).padding(.bottom, 15)
+                        
                         
                         HStack {
                             
@@ -403,8 +275,8 @@ struct ContentView: View {
                                     .font(.system(size: 12, weight: .semibold, design: .default))
                                     .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
                                     .padding()
-//
-//                                Spacer()
+                                //
+                                //                                Spacer()
                                 
                                 Text("\(viewModel.currentWeather?.main.humidity ?? 0)")
                                     .font(.system(size: 23, weight: .bold, design: .default))
@@ -421,21 +293,21 @@ struct ContentView: View {
                                     .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
                                     .padding()
                                 
-//                                Spacer()
+                                //                                Spacer()
                                 
                                 HStack(spacing: 5) {
                                     Text("\(Int(viewModel.currentWeather?.wind.speed ?? 0))")
                                         .font(.system(size: 23, weight: .bold, design: .default))
                                         .foregroundColor(Color(.black))
-                                        
+                                    
                                     Text("mph")
                                         .font(.caption2)
                                         .lineLimit(1)
-                                      
+                                        
                                         .foregroundColor(Color(#colorLiteral(red: 0.4431372549, green: 0.431372549, blue: 0.431372549, alpha: 1)))
                                 }.padding()
                                 
-                                    
+                                
                                 
                             }
                             
@@ -445,7 +317,7 @@ struct ContentView: View {
                                     .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
                                     .padding()
                                 
-//                                Spacer()
+                                //                                Spacer()
                                 
                                 Text("\(viewModel.currentTempMax ?? 0)°")
                                     .font(.system(size: 23, weight: .bold, design: .default))
@@ -460,7 +332,7 @@ struct ContentView: View {
                                     .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
                                     .padding()
                                 
-//                                Spacer()
+                                //                                Spacer()
                                 
                                 Text("\(viewModel.currentTempMin ?? 0)°")
                                     .font(.system(size: 23, weight: .bold, design: .default))
@@ -475,81 +347,137 @@ struct ContentView: View {
                                 .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0.0, y: 0.0)
                         )
                         
-//                        HourlyTemperatureCard()
+                        //                        HourlyTemperatureCard()
                         
                         VStack {
-                            Text("today")
-                                .font(.system(size: 20, weight: .semibold, design: .default))
-                                .padding()
-                                .padding(.bottom)
+                            HStack {
+                                Text("today")
+                                    .font(.system(size: 23, weight: .semibold, design: .default))
+                                    .padding(40)
+                                
+                                Spacer()
+                                
+                                Button(action: { showNextWeek = true }) {
+                                    HStack {
+                                        Text("next 7 days")
+                                            .font(.system(size: 17, weight: .semibold, design: .default))
+                                            .foregroundColor(.white)
+                                        
+                                        Image("arrow")
+                                    }
+                                    .padding(5)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(Color(#colorLiteral(red: 0.8226141334, green: 0.8073855042, blue: 0.8075038195, alpha: 1)))
+                                    )
+                                    .shadow(color: Color.black.opacity(0.3), radius: 2, x: 0, y: 0)
+                                    .padding(30)
+                                    
+                                }
+                            }
                             
-                          
+                            
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack {
+                                    Spacer()
+                                    ForEach(viewModel.hourlyTemps, id: \.self) { hour in
+                                        
+                                        
+                                        if hour.dt == viewModel.hourlyTemps.first!.dt {
+                                            
+                                            VStack {
+                                                Text("\(epochToTime(epoch: hour.dt))")
+                                                    .foregroundColor(Color.white)
+                                                
+                                                Spacer()
+                                                
+                                                Image(systemName: "\(returnWeatherIconInverted(id: viewModel.currentWeather?.weather.first?.id ?? -1))")
+                                                    .font(Font.largeTitle.weight(.semibold))
+                                                    .foregroundColor(Color.white)
+                                                    .frame(width: 30, height: 30)
+                                                
+                                                Spacer()
+                                                
+                                                Text("now")
+                                                    .foregroundColor(Color.white)
+                                                    .fontWeight(.semibold)
+                                                
+                                            }
+                                            .padding()
+//                                            .padding(.vertical, 30)
+                                           
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 17)
+                                                    .fill(Color(#colorLiteral(red: 0.3064880073, green: 0.7133082747, blue: 0.8459003568, alpha: 1)))
+                                                    .shadow(color: Color.black.opacity(0.6), radius: 3, x: 0, y: 0)
+                                            )
+                                            .padding(15)
+                                            
+                                            
+                                        } else {
+                                            VStack {
+                                                Text("\(epochToTime(epoch: hour.dt))")
+                                                    .foregroundColor(Color(#colorLiteral(red: 0.4548646212, green: 0.454932034, blue: 0.4548440576, alpha: 1)))
+                                                
+                                                Spacer()
+                                                
+                                                Image(systemName: "\(returnWeatherIconInverted(id: viewModel.currentWeather?.weather.first?.id ?? -1))")
+                                                    .font(Font.largeTitle.weight(.semibold))
+                                                    .foregroundColor(Color(#colorLiteral(red: 0.4548646212, green: 0.454932034, blue: 0.4548440576, alpha: 1)))
+                                                    .frame(width: 30, height: 30)
+                                                
+                                                Spacer()
+                                                
+                                                Text("\(Int(hour.temp))°")
+                                                    .foregroundColor(Color(#colorLiteral(red: 0.4548646212, green: 0.454932034, blue: 0.4548440576, alpha: 1)))
+                                                    .fontWeight(.semibold)
+                                            }
+                                            .padding()
+//                                            .padding(.vertical, 10)
+                                            
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 17)
+                                                    .fill(Color.white)
+                                                    .shadow(color: Color.black.opacity(0.6), radius: 3, x: 0, y: 0)
+                                            )
+                                            .padding(15)
+                                        }
+                                   
+                                        
+                                        
+                                    }
+                                }
+                                
+                                
+                            }
+                        
+                            
+                            
+                            
                         }
                         
-//                        VStack {
-//
-//                            Text("today")
-//                                .font(.system(size: 20, weight: .semibold, design: .default))
-//                            ZStack() {
-//                                Circle()
-//                                    .stroke(style:  StrokeStyle(
-//                                        lineWidth: 5,
-//                                        lineCap: .round,
-//                                        dash: [20]
-//
-//                                    ))
-//                                    .frame(width: circleWidth, height: circleWidth)
-//
-//                                    .rotationEffect(Angle(degrees: Double(self.dragTranslation.width/10)), anchor: .center)
-//
-//                                    .gesture(DragGesture()
-//                                                .onChanged({ (value) in
-//                                                    dragTranslation = value.translation
-//                                                    print(value.translation.width)
-//                                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-//                                                    dragging = true
-//                                                })
-//                                                .onEnded({ (value) in
-//                                                        if value.translation.width <= 200 {
-//                                                            dragTranslation = CGSize.zero
-//                                                        }
-//                                                    dragging = false
-//                                                })
-//
-//                                    )
-//                                    .animation(.spring(response: 2, dampingFraction: 0.3, blendDuration: 0.3), value: true)
-//                                    .edgesIgnoringSafeArea(.bottom)
-//
-//
-//                                if dragTranslation.width <= 200 {
-//                                    Text("today")
-//                                } else {
-//                                    Text("tomorrow")
-//                                }
-//
-//                            }
-//                        }.offset(x: 0, y: 500)
-                        //.offset(x: 0, y: 200)
-//                        Spacer()
+                        
                         
                     }
                     
-                   
-                      
+                    
+                    
                     
                     
                     
                     Spacer()
                     
-
+                    
                     
                     HStack {
                         Spacer()
-
+                        
                         Button(action: {
-
+                            
                             addButtonTapped.toggle()
                             keyboardInUse = false
+                            
                         }) {
                             Circle()
                                 .fill(addButtonTapped ? .black : Color.white)
@@ -560,12 +488,12 @@ struct ContentView: View {
                                     Image(systemName: "xmark")
                                         .foregroundColor(Color( addButtonTapped ? .white : #colorLiteral(red: 0.7450370193, green: 0.7255315781, blue: 0.7254028916, alpha: 1)) )
                                         .font(.system(size: 35, weight: .bold, design: .rounded))
-
+                                        
                                         .rotationEffect(.degrees(addButtonTapped ? 0 : 135))
                                 )
                                 .animation(.easeInOut)
                         }
-
+                        
                     }
                     
                     
@@ -577,26 +505,61 @@ struct ContentView: View {
                 viewModel.fetchWeather(city: selectedCity.city)
                 
                 
+                
             })
             
             
+            VStack {
                 
-             
+               
+                Spacer()
                 
-                
-         
-                
-
             }
-    
+            .background(
+            
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(Color(#colorLiteral(red: 0.2613917291, green: 0.6402744055, blue: 0.9006297588, alpha: 1)))
+                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height - 100)
+                    
+            
+            )
+            .offset(y: showNextWeek ? 50 : 1000)
+      
+            
+            
+            
+            
+            
             
         }
         
+        
+    }
+    
+    
+    
+    func epochToTime(epoch: Int) -> String {
 
+
+        let date = NSDate(timeIntervalSince1970: TimeInterval(epoch))
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeStyle = .medium
+        dateFormatter.dateFormat = "hh:mm a"
+        dateFormatter.amSymbol = "AM"
+        dateFormatter.pmSymbol = "PM"
+        var dateString = dateFormatter.string(from: date as Date)
         
-       
+        if dateString.first == "0" {
+            dateString.remove(at: dateString.startIndex)
+        }
         
         
+        
+        return dateString
+    }
+
+    
+    
     
     
 }
@@ -635,20 +598,43 @@ extension View {
 
 func returnWeatherIcon(id: Int) -> String {
     switch id {
-    case 200...232:
+    case 200...299:
         return "cloud.bolt.rain.fill"
-    case 300...321:
+    case 300...399:
         return "cloud.drizzle.fill"
-    case 500...531:
+    case 500...599:
         return "cloud.heavyrain.fill"
-    case 600...622:
+    case 600...699:
         return "cloud.snow.fill"
+    case 700...799:
+        return "smoke.fill"
     case 800:
-       return "cloud"
+        return "cloud"
     case 801...804:
         return "cloud.fill"
     default:
         return "sun.max.fill"
+    }
+}
+
+func returnWeatherIconInverted(id: Int) -> String {
+    switch id {
+    case 200...299:
+        return "cloud.bolt.rain"
+    case 300...399:
+        return "cloud.drizzle"
+    case 500...599:
+        return "cloud.heavyrain"
+    case 600...699:
+        return "cloud.snow"
+    case 700...799:
+        return "smoke"
+    case 800:
+        return "cloud"
+    case 801...804:
+        return "cloud"
+    default:
+        return "sun.max"
     }
 }
 
@@ -670,5 +656,4 @@ func returnWeatherColor(id: Int) -> Gradient {
         return ColorPalettes[0]
     }
 }
-
 

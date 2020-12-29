@@ -7,6 +7,9 @@
 
 import SwiftUI
 import Combine
+import Foundation
+
+
 
 class WeatherViewModel: ObservableObject {
     
@@ -17,16 +20,22 @@ class WeatherViewModel: ObservableObject {
     @Published var currentFeelsLike: Int?
     @Published var currentTempMax: Int?
     @Published var currentTempMin: Int?
-    @Published var hourlyTemp: [Hourly]?
     @Published var timezone_offset: Int?
-        
+    @Published var lat: Double?
+    @Published var long: Double?
+    
+    
+    
+   @Published var hourlyTemps: [Hourly] = []
+     
     var cityTemp: Int?
     
     private let url = "https://api.openweathermap.org/data/2.5/weather?appid=0ee7d97922c36d02d116dfbac3159fab&q="
     private var cancellable: AnyCancellable?
     private let oneUrl = "https://api.openweathermap.org/data/2.5/onecall?appid=0ee7d97922c36d02d116dfbac3159fab&lat="
     
-    public func fetchWeather(city: String) {
+     func fetchWeather(city: String) {
+        
         
         let safeCity = city.lowercased().filter("abcdefghigklmnopqrstuvwxyz+".contains)
         print(safeCity)
@@ -36,31 +45,43 @@ class WeatherViewModel: ObservableObject {
         cancellable = URLSession.shared.dataTaskPublisher(for: (urlStr)!)
             .receive(on: DispatchQueue.main)
             .sink { (_) in
-                
-            } receiveValue: { data, _ in
+
+            }
+            
+            receiveValue: { data, _ in
                 if let weatherData = try? JSONDecoder().decode(WeatherData.self, from: data) {
                     // Set weather
-                    
+
                     self.currentWeather = weatherData
                     self.currentTemp = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp)))
                     self.currentFeelsLike = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.feels_like)))
                     self.currentTempMax = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp_max)))
                     self.currentTempMin = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp_min)))
                     self.cityTemp = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp)))
-                    //                    fetchHourlyWeather(lat: weatherData.coord.lat, long: weatherData.coord.long)
-                    DispatchQueue.main.async {
-                        self.fetchHourlyWeather(lat: String(weatherData.coord.lat ?? 0), long: String(weatherData.coord.long ?? 0))
-                    }
+                    self.lat = weatherData.coord.lat
+                    self.long = weatherData.coord.lon
+
                     
-                    
+//                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+//                        print(self.long)
+                        self.fetchHourlyWeather(lat: self.lat!, long: self.long!)
+//                    }
+                  
+                   
                 }
             }
+            
+
+        
+        
+        
         
     }
     
-    public func fetchHourlyWeather(lat: String, long: String) {
-        let urlStr = URL(string: oneUrl + "\(lat)&lon=\(long)&exclude=current,minutely,daily,alerts")
-        
+
+    public func fetchHourlyWeather(lat: Double, long: Double) {
+        let urlStr = URL(string: oneUrl + "\(lat)&lon=\(long)&exclude=current,minutely,daily,alerts&units=imperial")
+
         cancellable = URLSession.shared.dataTaskPublisher(for: (urlStr)!)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { (_) in
@@ -72,44 +93,21 @@ class WeatherViewModel: ObservableObject {
                     
                     self.timezone_offset = hourlyWeather.timezone_offset
                     
-                    for weather in hourlyWeather.hourly {
-                        
-                        self.hourlyTemp?.append(weather)
-                        
-                    }
+                    self.hourlyTemps = hourlyWeather.hourly
                     
-           
+                    print("offset is = \(hourlyWeather.timezone_offset)")
+                    
+                   
                 }
+           
+                
                 
               
             })
         
     }
     
-    
-//    public func fetchOneCityWeather(city: String) -> Int {
-//        var temp = -1
-//
-//        let safeCity = city.lowercased().filter("abcdefghigklmnopqrstuvwxyz+".contains)
-//
-//        let urlStr = URL(string: url + safeCity)
-//
-//        cancellable = URLSession.shared.dataTaskPublisher(for: (urlStr)!)
-//            .receive(on: DispatchQueue.main)
-//            .sink { (_) in
-//
-//            } receiveValue: { data, _ in
-//                if let weatherData = try? JSONDecoder().decode(WeatherData.self, from: data) {
-//
-//                    // Set weather
-//                    temp = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp)))
-//                }
-//            }
-//
-//        return temp
-//
-//    }
-    
+
     
     func toCelsius(kelvin: Double) -> Double {
         

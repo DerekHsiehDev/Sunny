@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct WeatherData: Decodable {
     
@@ -21,7 +22,7 @@ struct WeatherData: Decodable {
 }
 
 struct Coord: Decodable {
-    let long: Double?
+    let lon: Double?
     let lat: Double?
 }
 
@@ -49,7 +50,8 @@ struct HourlyWeatherData: Decodable {
     let timezone_offset: Int
 }
 
-struct Hourly: Decodable {
+struct Hourly: Decodable, Hashable {
+ 
     let dt: Int
     let temp: Double
 }
