@@ -43,6 +43,8 @@ struct ContentView: View {
     @State var selectedCity = cities.first!
     @ObservedObject var fetcher = CityFetcher()
     @State var keyboardInUse = false
+    @State private var draggedOffset = CGSize.zero
+    @State private var dismissCard = false
     //    @State var temps = [String: Int]()
     
     //circle view
@@ -357,7 +359,11 @@ struct ContentView: View {
                                 
                                 Spacer()
                                 
-                                Button(action: { showNextWeek = true }) {
+                                Button(action: { showNextWeek = true
+                                    self.dismissCard = false
+                                    
+                                    
+                                }) {
                                     HStack {
                                         Text("next 7 days")
                                             .font(.system(size: 17, weight: .semibold, design: .default))
@@ -518,12 +524,41 @@ struct ContentView: View {
             .background(
             
                 RoundedRectangle(cornerRadius: 18)
-                    .fill(Color(#colorLiteral(red: 0.2613917291, green: 0.6402744055, blue: 0.9006297588, alpha: 1)))
+                    .fill(Color(dismissCard ? #colorLiteral(red: 0.2613917291, green: 0.6402744055, blue: 0.9006297588, alpha: 0.6237081566) : #colorLiteral(red: 0.2613917291, green: 0.6402744055, blue: 0.9006297588, alpha: 1)))
                     .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height - 100)
                     
             
             )
-            .offset(y: showNextWeek ? 50 : 1000)
+            .offset(y: showNextWeek ? self.draggedOffset.height + 50 : 1000)
+            .gesture(DragGesture()
+                        .onChanged { value in
+                            
+                            if value.translation.height > -10 {
+                                self.draggedOffset = value.translation
+                            }
+                            if value.translation.height > 365 {
+                                self.dismissCard = true
+                            } else {
+                                self.dismissCard = false
+                                
+                            }
+                          
+                        }
+                        .onEnded { value in
+                            
+                            if value.translation.height > 365 {
+                                showNextWeek = false
+                               
+                                self.draggedOffset = CGSize.zero
+                            } else {
+                                self.draggedOffset = CGSize.zero
+                            }
+                            
+                        }
+                     
+                        
+            )
+            .animation(.spring())
       
             
             
