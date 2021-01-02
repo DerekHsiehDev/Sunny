@@ -48,6 +48,26 @@ struct Wind: Decodable {
 struct HourlyWeatherData: Decodable {
     let hourly: [Hourly]
     let timezone_offset: Int
+    let daily: [Daily]
+}
+
+struct Daily: Decodable, Hashable {
+    
+    let dt: Int
+    
+    let temp: Temp
+    
+    let weather: [DailyWeather]
+
+}
+
+struct DailyWeather: Decodable, Hashable {
+    let id: Int
+}
+
+struct Temp: Decodable, Hashable {
+    let min: Double
+    let max: Double
 }
 
 struct Hourly: Decodable, Hashable {

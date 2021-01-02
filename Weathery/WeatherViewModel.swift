@@ -23,7 +23,7 @@ class WeatherViewModel: ObservableObject {
     @Published var timezone_offset: Int?
     @Published var lat: Double?
     @Published var long: Double?
-    
+    @Published var dailyWeather: [Daily]?
     
     
    @Published var hourlyTemps: [Hourly] = []
@@ -80,7 +80,8 @@ class WeatherViewModel: ObservableObject {
     
 
     public func fetchHourlyWeather(lat: Double, long: Double) {
-        let urlStr = URL(string: oneUrl + "\(lat)&lon=\(long)&exclude=current,minutely,daily,alerts&units=imperial")
+        let urlStr = URL(string: oneUrl + "\(lat)&lon=\(long)&exclude=current,minutely,alerts&units=imperial")
+        
 
         cancellable = URLSession.shared.dataTaskPublisher(for: (urlStr)!)
             .receive(on: DispatchQueue.main)
@@ -96,6 +97,9 @@ class WeatherViewModel: ObservableObject {
                     self.hourlyTemps = hourlyWeather.hourly
                     
                     print("offset is = \(hourlyWeather.timezone_offset)")
+                    
+                    self.dailyWeather = hourlyWeather.daily
+                    print(hourlyWeather.daily)
                     
                    
                 }

@@ -62,6 +62,7 @@ struct ContentView: View {
         ZStack {
             Color(#colorLiteral(red: 0.9371728301, green: 0.9373074174, blue: 0.9371433854, alpha: 1))
                 .edgesIgnoringSafeArea(.all)
+
             
             
             
@@ -70,7 +71,9 @@ struct ContentView: View {
                 
                 VStack {
                     
-                    Button(action: {addButtonTapped.toggle()
+                    Button(action: {
+                        addButtonTapped.toggle()
+                        showNextWeek = false
                         
                         print(selectedCity.city)
                         keyboardInUse = false
@@ -159,6 +162,7 @@ struct ContentView: View {
                                     
                                     if searchText.count >= 3 {
                                         ScrollView {
+                                            
                                             ForEach(fetcher.cities.filter({"\($0)".contains(searchText)}), id: \.self) { city in
                                                 
                                                 
@@ -513,14 +517,81 @@ struct ContentView: View {
                 
                 
             })
+            .padding(.horizontal, 30)
             
             
             VStack {
+                
+                HStack {
+                    Spacer()
+                    
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.white)
+                        .frame(width: 50, height: 5)
+                        
+                    
+                    Spacer()
+                }
+                
+                HStack {
+                    Text("next week forcast")
+                        .foregroundColor(.white)
+                        .bold()
+                        .font(.title)
+                        .padding(.horizontal)
+                    Spacer()
+                }
+                .padding(.vertical, 30)
+                
+                ScrollView {
+                    VStack {
+                        
+                        if viewModel.dailyWeather != nil {
+                            
+                            ForEach(viewModel.dailyWeather!, id: \.self) { daily in
+                                HStack {
+                                    Image(systemName: returnWeatherIcon(id: daily.weather[0].id))
+                                        .font(.system(size: 30, weight: .light, design: .rounded))
+                                        .foregroundColor(Color(#colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)))
+                                    Text("\(epochToDayName(epoch: daily.dt).lowercased())")
+                                        .padding(.horizontal)
+                                        .foregroundColor(Color(#colorLiteral(red: 0.1215686277, green: 0.01176470611, blue: 0.2250791796, alpha: 1)))
+                                        .font(.system(size: 26, weight: .semibold, design: .rounded))
+                                    Spacer()
+                                    Text("\(Int(daily.temp.max))°")
+                                        .font(.system(size: 25, weight: .semibold, design: .rounded))
+                                    Text("\(Int(daily.temp.min))°")
+                                        .font(.system(size: 23, weight: .semibold, design: .rounded))
+                                        .foregroundColor(Color(#colorLiteral(red: 0.7347081304, green: 0.8017949462, blue: 0.8352752328, alpha: 1)))
+                                }.padding(20)
+                                .padding(.vertical, 10)
+                                Divider()
+                            }
+                            
+                        }
+                     
+                        
+                     
+                    
+                            
+                    }
+                    .padding(.bottom, 50)
+                    .frame(width: UIScreen.main.bounds.width)
+                    .background(
+                        Color.white.opacity(dismissCard ? 0.2 : 1)
+                            
+                           
+                    )
+                    
+                }
+                
+              
                 
                
                 Spacer()
                 
             }
+            .padding(30)
             .background(
             
                 RoundedRectangle(cornerRadius: 18)
@@ -591,6 +662,15 @@ struct ContentView: View {
         
         
         return dateString
+    }
+    
+    func epochToDayName(epoch: Int) -> String {
+        let date = NSDate(timeIntervalSince1970: TimeInterval(epoch))
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeStyle = .none
+        dateFormatter.dateFormat = "EEEE"
+        
+        return dateFormatter.string(from: date as Date)
     }
 
     
