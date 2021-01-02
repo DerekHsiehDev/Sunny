@@ -6,17 +6,21 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct Cities: Hashable {
     
     var city: String
     var country: String
+    var lat: Double
+    var lng: Double
     
     
-    init(city: String, country: String) {
+    init(city: String, country: String, lat: Double, lng: Double) {
         self.city = city
         self.country = country
-        
+        self.lat = lat
+        self.lng = lng
     }
 }
 
@@ -25,14 +29,8 @@ struct Cities: Hashable {
 
 
 var cities = [
-    Cities(city: "Corona", country: "United States")
-    
+    Cities(city: "Current Location", country: "", lat: 0.0, lng: 0.0)
 ]
-
-
-
-
-
 
 
 
@@ -40,6 +38,7 @@ struct ContentView: View {
     @State var addButtonTapped = false
     @State var hourlyTemps = [Hourly]()
     @State var searchText = ""
+    @State var currentLocation = true
     @State var selectedCity = cities.first!
     @ObservedObject var fetcher = CityFetcher()
     @State var keyboardInUse = false
@@ -58,7 +57,13 @@ struct ContentView: View {
     @ObservedObject public var viewModel = WeatherViewModel()
     
     
+    @ObservedObject private var locationManager = LocationManager()
+    
     var body: some View {
+        
+        let coordinate = self.locationManager.location != nil ? self.locationManager.location!.coordinate : CLLocationCoordinate2D()
+        
+        
         ZStack {
             Color(#colorLiteral(red: 0.9371728301, green: 0.9373074174, blue: 0.9371433854, alpha: 1))
                 .edgesIgnoringSafeArea(.all)
@@ -75,21 +80,49 @@ struct ContentView: View {
                         addButtonTapped.toggle()
                         showNextWeek = false
                         
-                        print(selectedCity.city)
                         keyboardInUse = false
-                        viewModel.fetchWeather(city: selectedCity.city)
+//                        viewModel.fetchWeather(city: selectedCity.city)
                     }) {
                         
                         HStack {
-                            Spacer()
-                            Text(addButtonTapped ? "add" : "\(selectedCity.city),")
-                                .fontWeight(addButtonTapped ? .light : .bold)
-                                .foregroundColor(.black)
-                            Text(addButtonTapped ? "city" : "\(selectedCity.country)")
-                                .fontWeight(addButtonTapped ? .bold : .light)
-                                .foregroundColor(.black)
                             
-                            Spacer()
+                            if selectedCity.city == "Current Location"  {
+                                Spacer()
+                                Text(addButtonTapped ? "add" : "\(viewModel.name ?? "")")
+                                    .fontWeight(addButtonTapped ? .light : .bold)
+                                    .foregroundColor(.black)
+                                
+                                if viewModel.name != "" {
+                                    Text(addButtonTapped ? "" : ",")
+                                        .fontWeight(addButtonTapped ? .light : .bold)
+                                        .foregroundColor(.black)
+                                }
+                               
+                                Text(addButtonTapped ? "city" : "\(viewModel.country ?? "")")
+                                    .fontWeight(addButtonTapped ? .bold : .light)
+                                    .foregroundColor(.black)
+                                
+                                Spacer()
+                            } else {
+                                Spacer()
+                                Text(addButtonTapped ? "add" : "\(selectedCity.city )")
+                                    .fontWeight(addButtonTapped ? .light : .bold)
+                                    .foregroundColor(.black)
+                                
+                                if viewModel.name != "" {
+                                    Text(addButtonTapped ? "" : ",")
+                                        .fontWeight(addButtonTapped ? .light : .bold)
+                                        .foregroundColor(.black)
+                                }
+                               
+                                Text(addButtonTapped ? "city" : "\(selectedCity.country )")
+                                    .fontWeight(addButtonTapped ? .bold : .light)
+                                    .foregroundColor(.black)
+                                
+                                Spacer()
+                            }
+                            
+                        
                         }
                         .padding()
                         
@@ -122,11 +155,19 @@ struct ContentView: View {
                                         ForEach(cities, id: \.self) { city in
                                             HStack {
                                                 
-                                                Text("\(city.city), ")
-                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
-                                                    .fontWeight(.bold)
+                                                if city.city == "Current Location" {
+                                                    Text("\(city.city)")
+                                                        .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                        .fontWeight(.bold)
+                                                        .padding(.leading, 40)
+                                                }
+                                                else {
+                                                    Text("\(city.city), ")
+                                                        .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                        .fontWeight(.bold)
+                                                        .padding(.leading, 40)
+                                                }
                                                     
-                                                    .padding(.leading, 40)
                                                 Text("\(city.country)")
                                                     .foregroundColor(searchText.isEmpty ? .white : .black)
                                                 Spacer()
@@ -142,9 +183,17 @@ struct ContentView: View {
                                             //                                            }
                                             
                                             .onTapGesture {
+                                                
                                                 selectedCity = city
                                                 
-                                                self.viewModel.fetchWeather(city: (city.city as NSString).replacingOccurrences(of: " ", with: "+"))
+                                                if city.city == "Current Location" {
+                                                    self.viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
+                                                   
+                                                } else {
+                                                    self.viewModel.fetchAllWeather(lat: city.lat, long: city.lng)
+                                                }
+                                                
+                                                
                                                 
                                                 addButtonTapped = false
                                                 
@@ -181,7 +230,7 @@ struct ContentView: View {
                                                     keyboardInUse = false
                                                     self.hideKeyboard()
                                                     
-                                                    cities.append(Cities(city: city.city!, country: city.country!))
+                                                    cities.append(Cities(city: city.city!, country: city.country!, lat: city.lat!, lng: city.lng!))
                                                     
                                                 }
                                                 Divider()
@@ -491,7 +540,7 @@ struct ContentView: View {
                         }) {
                             Circle()
                                 .fill(addButtonTapped ? .black : Color.white)
-                                .frame(width: 100, height: 100)
+                                .frame(width: 90, height: 90)
                                 .padding(.horizontal)
                                 .shadow(color: Color(addButtonTapped ? .black : #colorLiteral(red: 0.7450370193, green: 0.7255315781, blue: 0.7254028916, alpha: 1)), radius: 4, x: 0, y: 0)
                                 .overlay(
@@ -512,9 +561,19 @@ struct ContentView: View {
             }
             .onAppear(perform: {
                 
-                viewModel.fetchWeather(city: selectedCity.city)
+          
+                     viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
+                    
+                
+                       
                 
                 
+                
+//                Text("\(coordinate.latitude), \(coordinate.longitude)")
+              
+                
+                
+             
                 
             })
             .padding(.horizontal, 30)
@@ -607,7 +666,7 @@ struct ContentView: View {
                             if value.translation.height > -10 {
                                 self.draggedOffset = value.translation
                             }
-                            if value.translation.height > 365 {
+                            if value.translation.height > 50 {
                                 self.dismissCard = true
                             } else {
                                 self.dismissCard = false
@@ -623,6 +682,8 @@ struct ContentView: View {
                                 self.draggedOffset = CGSize.zero
                             } else {
                                 self.draggedOffset = CGSize.zero
+                                self.dismissCard = false
+                                
                             }
                             
                         }
@@ -632,8 +693,7 @@ struct ContentView: View {
             .animation(.spring())
       
             
-            
-            
+    
             
             
             

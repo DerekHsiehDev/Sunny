@@ -19,6 +19,12 @@ struct WeatherData: Decodable {
     let weather: [Weather]
     
     let coord: Coord
+    
+    let sys: Sys
+}
+
+struct Sys: Decodable {
+    let country: String
 }
 
 struct Coord: Decodable {
@@ -75,4 +81,7 @@ struct Hourly: Decodable, Hashable {
     let dt: Int
     let temp: Double
 }
+
+
+
 

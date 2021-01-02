@@ -8,7 +8,7 @@
 import SwiftUI
 import Combine
 import Foundation
-
+import CoreLocation
 
 
 class WeatherViewModel: ObservableObject {
@@ -24,6 +24,8 @@ class WeatherViewModel: ObservableObject {
     @Published var lat: Double?
     @Published var long: Double?
     @Published var dailyWeather: [Daily]?
+    @Published var country: String?
+    @Published var name: String?
     
     
    @Published var hourlyTemps: [Hourly] = []
@@ -31,6 +33,8 @@ class WeatherViewModel: ObservableObject {
     var cityTemp: Int?
     
     private let url = "https://api.openweathermap.org/data/2.5/weather?appid=0ee7d97922c36d02d116dfbac3159fab&q="
+    private let coordUrl =
+    "https://api.openweathermap.org/data/2.5/weather?appid=0ee7d97922c36d02d116dfbac3159fab&lat="
     private var cancellable: AnyCancellable?
     private let oneUrl = "https://api.openweathermap.org/data/2.5/onecall?appid=0ee7d97922c36d02d116dfbac3159fab&lat="
     
@@ -60,6 +64,9 @@ class WeatherViewModel: ObservableObject {
                     self.cityTemp = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp)))
                     self.lat = weatherData.coord.lat
                     self.long = weatherData.coord.lon
+                    self.name = weatherData.name
+                    self.country = weatherData.sys.country
+                    
 
                     
 //                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
@@ -81,7 +88,6 @@ class WeatherViewModel: ObservableObject {
 
     public func fetchHourlyWeather(lat: Double, long: Double) {
         let urlStr = URL(string: oneUrl + "\(lat)&lon=\(long)&exclude=current,minutely,alerts&units=imperial")
-        
 
         cancellable = URLSession.shared.dataTaskPublisher(for: (urlStr)!)
             .receive(on: DispatchQueue.main)
@@ -108,6 +114,42 @@ class WeatherViewModel: ObservableObject {
                 
               
             })
+        
+    }
+    
+    public func fetchAllWeather(lat: Double, long: Double) {
+        
+        let urlStr = URL(string: coordUrl + "\(lat)&lon=\(long)")
+    
+        cancellable = URLSession.shared.dataTaskPublisher(for: (urlStr)!)
+            .receive(on: DispatchQueue.main)
+            .sink { (_) in
+
+            }
+            
+            receiveValue: { data, _ in
+                if let weatherData = try? JSONDecoder().decode(WeatherData.self, from: data) {
+                    // Set weather
+
+                    self.currentWeather = weatherData
+                    self.currentTemp = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp)))
+                    self.currentFeelsLike = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.feels_like)))
+                    self.currentTempMax = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp_max)))
+                    self.currentTempMin = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp_min)))
+                    self.cityTemp = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp)))
+                    self.name = weatherData.name
+                    self.country = weatherData.sys.country
+                    
+//                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+//                        print(self.long)
+                        self.fetchHourlyWeather(lat: lat, long: long)
+//                    }
+                  
+                   
+                }
+            }
+        
+    
         
     }
     

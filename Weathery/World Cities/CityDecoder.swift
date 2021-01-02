@@ -11,6 +11,10 @@ struct WorldCities : Codable, Identifiable, Hashable {
     let country : String?
   
     let id : Int?
+    
+    let lat: Double?
+    
+    let lng: Double?
    
 
     enum CodingKeys: String, CodingKey {
@@ -21,6 +25,10 @@ struct WorldCities : Codable, Identifiable, Hashable {
         
         
         case id = "id"
+        
+        case lat = "lat"
+        
+        case lng = "lng"
   
     }
 
@@ -29,6 +37,8 @@ struct WorldCities : Codable, Identifiable, Hashable {
         city = try values.decodeIfPresent(String.self, forKey: .city)
         country = try values.decodeIfPresent(String.self, forKey: .country)
         id = try values.decodeIfPresent(Int.self, forKey: .id)
+        lat = try values.decodeIfPresent(Double.self, forKey: .lat)
+        lng = try values.decodeIfPresent(Double.self, forKey: .lng)
     }
 
 }
