@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct WeatheryApp: App {
+    
+    let persistenceContainer = PersistenceController.shared
+
+    
     var body: some Scene {
+        
         WindowGroup {
             ContentView()
+                .environment(\.managedObjectContext, persistenceContainer.container.viewContext)
         }
     }
 }

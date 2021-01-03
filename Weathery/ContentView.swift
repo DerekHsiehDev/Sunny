@@ -7,6 +7,8 @@
 
 import SwiftUI
 import CoreLocation
+import CoreData
+
 
 struct Cities: Hashable {
     
@@ -28,22 +30,31 @@ struct Cities: Hashable {
 
 
 
-var cities = [
+var citiesList = [
     Cities(city: "Current Location", country: "", lat: 0.0, lng: 0.0)
 ]
 
 
 
 struct ContentView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    
+    @FetchRequest(entity: City.entity(), sortDescriptors: [
+        NSSortDescriptor(keyPath: \City.city, ascending: true)
+    ]) private var cities: FetchedResults<City>
+    private var indexOfCities = 0
+    @State private var citiesArray = [String]()
+    
     @State var addButtonTapped = false
     @State var hourlyTemps = [Hourly]()
     @State var searchText = ""
     @State var currentLocation = true
-    @State var selectedCity = cities.first!
+    @State var selectedCity = citiesList.first!
     @ObservedObject var fetcher = CityFetcher()
     @State var keyboardInUse = false
     @State private var draggedOffset = CGSize.zero
     @State private var dismissCard = false
+    
     //    @State var temps = [String: Int]()
     
     //circle view
@@ -58,6 +69,15 @@ struct ContentView: View {
     
     
     @ObservedObject private var locationManager = LocationManager()
+    
+    fileprivate func saveContext() {
+        do {
+            try viewContext.save()
+        } catch {
+            let error = error as NSError
+            fatalError("unresolved err: \(error)")
+        }
+    }
     
     var body: some View {
         
@@ -92,7 +112,7 @@ struct ContentView: View {
                                     .fontWeight(addButtonTapped ? .light : .bold)
                                     .foregroundColor(.black)
                                 
-                                if viewModel.name != "" {
+                                if viewModel.name != nil {
                                     Text(addButtonTapped ? "" : ",")
                                         .fontWeight(addButtonTapped ? .light : .bold)
                                         .foregroundColor(.black)
@@ -109,7 +129,7 @@ struct ContentView: View {
                                     .fontWeight(addButtonTapped ? .light : .bold)
                                     .foregroundColor(.black)
                                 
-                                if viewModel.name != "" {
+                                if viewModel.name != nil {
                                     Text(addButtonTapped ? "" : ",")
                                         .fontWeight(addButtonTapped ? .light : .bold)
                                         .foregroundColor(.black)
@@ -151,26 +171,68 @@ struct ContentView: View {
                                 
                                 ZStack {
                                     ScrollView {
+                                        VStack {
+                                        HStack {
+                                            Text("Current Location")
+                                                .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                .fontWeight(.bold)
+                                                .padding(.leading, 40)
+                                            Spacer()
+
+
+                                        }.padding([.bottom, .top], 30)
+                                        
+                                        .onTapGesture {
+                                            print(coordinate.latitude)
+                                            self.viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
+                                            addButtonTapped = false
+                                        }
                                         
                                         ForEach(cities, id: \.self) { city in
                                             HStack {
                                                 
-                                                if city.city == "Current Location" {
-                                                    Text("\(city.city)")
+                                          
+                                               
+                                                    Text("\(city.city!), ")
                                                         .foregroundColor(searchText.isEmpty ? .white : .black)
                                                         .fontWeight(.bold)
                                                         .padding(.leading, 40)
-                                                }
-                                                else {
-                                                    Text("\(city.city), ")
-                                                        .foregroundColor(searchText.isEmpty ? .white : .black)
-                                                        .fontWeight(.bold)
-                                                        .padding(.leading, 40)
-                                                }
+                                                
                                                     
-                                                Text("\(city.country)")
+                                                Text("\(city.country!)")
                                                     .foregroundColor(searchText.isEmpty ? .white : .black)
                                                 Spacer()
+                                                
+//                                                if searchText.count == 0 {
+                                                    Button(action: {
+
+                                                        let myIndex = citiesArray.firstIndex(of: city.city!)
+
+                                                        delete(index: myIndex ?? -1)
+
+                                                        if myIndex != nil {
+                                                            citiesArray.remove(at: myIndex!)
+                                                        }
+
+
+
+                                                        print(citiesArray)
+
+                                                    }) {
+                                                        Circle()
+                                                            .fill(searchText.isEmpty ? Color.red : Color.black)
+                                                            .frame(width: 35, height: 35)
+                                                            .overlay(
+                                                                Image(systemName: "xmark")
+                                                                    .font(.system(size: 15))
+                                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                            )
+                                                            .padding(.horizontal)
+                                                            .padding(.trailing)
+                                                    }
+//                                                }
+                                                
+                                             
                                                 
                                                 //                                                Text("\(0)°")
                                                 //                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
@@ -178,35 +240,46 @@ struct ContentView: View {
                                                 //                                                    .font(.title3)
                                                 //                                                    .padding(.trailing, 40)
                                             }
+                                            .padding(.bottom, 30)
+                                       
                                             //                                            .onAppear {
                                             //                                                viewModel.fetchOneCityWeather(city: city.city.lowercased())
                                             //                                            }
-                                            
+                                            .onAppear {
+                                                if citiesArray.firstIndex(of: city.city!) == nil {
+                                                    citiesArray.insert(city.city!, at: 0)
+                                                    citiesArray.sort()
+                                                }
+                                                
+                                                print(coordinate.longitude)
+                                            }
                                             .onTapGesture {
                                                 
-                                                selectedCity = city
+//                                                selectedCity = city
                                                 
-                                                if city.city == "Current Location" {
-                                                    self.viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
+                                                print(city.city!)
                                                    
-                                                } else {
+                                                   
+                                       
                                                     self.viewModel.fetchAllWeather(lat: city.lat, long: city.lng)
-                                                }
+                                                
                                                 
                                                 
                                                 
                                                 addButtonTapped = false
                                                 
+                                                
+                                                
                                             }
-                                            .padding(.bottom, 70)
                                             
-                                            Spacer()
+                                            
+//                                            Spacer()
                                             
                                             
                                             
                                             
                                         }.padding(.top, 30)
-                                        
+                                        }
                                     }
                                     
                                     if searchText.count >= 3 {
@@ -230,7 +303,23 @@ struct ContentView: View {
                                                     keyboardInUse = false
                                                     self.hideKeyboard()
                                                     
-                                                    cities.append(Cities(city: city.city!, country: city.country!, lat: city.lat!, lng: city.lng!))
+//                                                    citiesArray.append(city.city!)
+                                                    
+                                                    if citiesArray.firstIndex(of: city.city!) == nil {
+                                                        citiesArray.insert(city.city!, at: 0)
+                                                        citiesArray.sort()
+                                                        let newCity = City(context: viewContext)
+                                                        newCity.city = city.city!
+                                                        newCity.country = city.country!
+                                                        newCity.lat = city.lat!
+                                                        newCity.lng = city.lng!
+                                                        
+                                                        saveContext()
+                                                    }
+                                                    
+                                                    
+                                                
+                                                    
                                                     
                                                 }
                                                 Divider()
@@ -292,7 +381,7 @@ struct ContentView: View {
                                     .foregroundColor(.white)
                                     .fontWeight(.bold)
                                     .font(.title)
-                                    .minimumScaleFactor(0.7)
+                                    .minimumScaleFactor(0.5)
                                     .padding(.horizontal)
                                     .padding(.bottom, 15)
                                 
@@ -561,16 +650,43 @@ struct ContentView: View {
             }
             .onAppear(perform: {
                 
-          
-                     viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
+//                if coordinate.latitude == 0.0 {
+//                    DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
+//                        print(coordinate.latitude)
+//                        self.viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
+//                        print("watied 1 second")
+//                    }
+//                }
+//e
+//                print(coordinate.latitude)
+//                self.viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
+//                addButtonTapped = false
+//
+//                viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
+//
+//                print(coordinate.latitude)
+//
+//                print("ON APPEAR")
+                
+                var lat = locationManager.location?.coordinate.latitude
+                var long = locationManager.location?.coordinate.longitude
+                
+                if long == nil && lat == nil {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        
+                        lat = locationManager.location?.coordinate.latitude
+                         long = locationManager.location?.coordinate.longitude
+
+                        self.viewModel.fetchAllWeather(lat: lat ?? 0, long: long ?? 0)
+                    }
+                } else {
+                   
                     
+                    self.viewModel.fetchAllWeather(lat: lat!, long: long!)
+                }
                 
-                       
-                
-                
-                
-//                Text("\(coordinate.latitude), \(coordinate.longitude)")
-              
+               
+           
                 
                 
              
@@ -587,7 +703,9 @@ struct ContentView: View {
                     RoundedRectangle(cornerRadius: 10)
                         .fill(Color.white)
                         .frame(width: 50, height: 5)
-                        
+                        .onTapGesture {
+                            showNextWeek = false
+                        }
                     
                     Spacer()
                 }
@@ -598,6 +716,9 @@ struct ContentView: View {
                         .bold()
                         .font(.title)
                         .padding(.horizontal)
+                        .onTapGesture {
+                            showNextWeek = false
+                        }
                     Spacer()
                 }
                 .padding(.vertical, 30)
@@ -700,6 +821,18 @@ struct ContentView: View {
         }
         
         
+    }
+    
+    func delete(index: Int) {
+        
+        if index == -1 {
+            return
+        } else {
+        let deletedCity = cities[index]
+        viewContext.delete(deletedCity)
+        
+        saveContext()
+        }
     }
     
     
