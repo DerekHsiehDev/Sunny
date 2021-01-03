@@ -175,7 +175,7 @@ struct ContentView: View {
                                         HStack {
                                             Text("Current Location")
                                                 .foregroundColor(searchText.isEmpty ? .white : .black)
-                                                .fontWeight(.bold)
+                                                .fontWeight(.heavy)
                                                 .padding(.leading, 40)
                                             Spacer()
 
@@ -673,6 +673,22 @@ struct ContentView: View {
                 
                 if long == nil && lat == nil {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        
+                        
+                        if long == nil && lat == nil {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                
+                                lat = locationManager.location?.coordinate.latitude
+                                 long = locationManager.location?.coordinate.longitude
+
+                                self.viewModel.fetchAllWeather(lat: lat ?? 0, long: long ?? 0)
+                            }
+                        } else {
+                           
+                            
+                            self.viewModel.fetchAllWeather(lat: lat!, long: long!)
+                        }
+                        
                         
                         lat = locationManager.location?.coordinate.latitude
                          long = locationManager.location?.coordinate.longitude
