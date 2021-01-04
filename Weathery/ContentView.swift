@@ -38,7 +38,7 @@ var citiesList = [
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
-    
+    @Environment(\.colorScheme) var colorScheme
     @FetchRequest(entity: City.entity(), sortDescriptors: [
         NSSortDescriptor(keyPath: \City.city, ascending: true)
     ]) private var cities: FetchedResults<City>
@@ -85,9 +85,9 @@ struct ContentView: View {
         
         
         ZStack {
-            Color(#colorLiteral(red: 0.9371728301, green: 0.9373074174, blue: 0.9371433854, alpha: 1))
+            Color(colorScheme == .light ? #colorLiteral(red: 0.9371728301, green: 0.9373074174, blue: 0.9371433854, alpha: 1) : #colorLiteral(red: 0.08657442778, green: 0.08659679443, blue: 0.08657146245, alpha: 1) )
                 .edgesIgnoringSafeArea(.all)
-
+            
             
             
             
@@ -101,7 +101,7 @@ struct ContentView: View {
                         showNextWeek = false
                         
                         keyboardInUse = false
-//                        viewModel.fetchWeather(city: selectedCity.city)
+                        //                        viewModel.fetchWeather(city: selectedCity.city)
                     }) {
                         
                         HStack {
@@ -110,39 +110,39 @@ struct ContentView: View {
                                 Spacer()
                                 Text(addButtonTapped ? "add" : "\(viewModel.name ?? "")")
                                     .fontWeight(addButtonTapped ? .light : .bold)
-                                    .foregroundColor(.black)
+                                    .foregroundColor(colorScheme == .light ? .black : .white)
                                 
                                 if viewModel.name != nil {
                                     Text(addButtonTapped ? "" : ",")
                                         .fontWeight(addButtonTapped ? .light : .bold)
-                                        .foregroundColor(.black)
+                                        .foregroundColor(colorScheme == .light ? .black : .white)
                                 }
-                               
+                                
                                 Text(addButtonTapped ? "city" : "\(viewModel.country ?? "")")
                                     .fontWeight(addButtonTapped ? .bold : .light)
-                                    .foregroundColor(.black)
+                                    .foregroundColor(colorScheme == .light ? .black : .white)
                                 
                                 Spacer()
                             } else {
                                 Spacer()
                                 Text(addButtonTapped ? "add" : "\(selectedCity.city )")
                                     .fontWeight(addButtonTapped ? .light : .bold)
-                                    .foregroundColor(.black)
+                                    .foregroundColor(colorScheme == .light ? .black : .white)
                                 
                                 if viewModel.name != nil {
                                     Text(addButtonTapped ? "" : ",")
                                         .fontWeight(addButtonTapped ? .light : .bold)
-                                        .foregroundColor(.black)
+                                        .foregroundColor(colorScheme == .light ? .black : .white)
                                 }
-                               
+                                
                                 Text(addButtonTapped ? "city" : "\(selectedCity.country )")
                                     .fontWeight(addButtonTapped ? .bold : .light)
-                                    .foregroundColor(.black)
+                                    .foregroundColor(colorScheme == .light ? .black : .white)
                                 
                                 Spacer()
                             }
                             
-                        
+                            
                         }
                         .padding()
                         
@@ -154,12 +154,14 @@ struct ContentView: View {
                             VStack {
                                 
                                 HStack {
-                                    TextField("search city here", text: $searchText)
+//                                    TextField("search city here", text: $searchText)
+//                                        .onTapGesture {
+//                                            keyboardInUse = true
+//                                        }
+                                    CustomTextField(placeholder: Text("search for city").foregroundColor(Color(#colorLiteral(red: 0.2834932506, green: 0.2871159315, blue: 0.2869921327, alpha: 1))), text: $searchText)
                                         .onTapGesture {
-                                            keyboardInUse = true
-                                        }
-                                    
-                                    
+                                                                                 keyboardInUse = true
+                                                                             }
                                     
                                 }
                                 
@@ -172,52 +174,52 @@ struct ContentView: View {
                                 ZStack {
                                     ScrollView {
                                         VStack {
-                                        HStack {
-                                            Text("Current Location")
-                                                .foregroundColor(searchText.isEmpty ? .white : .black)
-                                                .fontWeight(.heavy)
-                                                .padding(.leading, 40)
-                                            Spacer()
-
-
-                                        }.padding([.bottom, .top], 30)
-                                        
-                                        .onTapGesture {
-                                            print(coordinate.latitude)
-                                            self.viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
-                                            addButtonTapped = false
-                                        }
-                                        
-                                        ForEach(cities, id: \.self) { city in
                                             HStack {
+                                                Text("Current Location")
+                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                    .fontWeight(.heavy)
+                                                    .padding(.leading, 40)
+                                                Spacer()
                                                 
-                                          
-                                               
+                                                
+                                            }.padding([.bottom, .top], 30)
+                                            
+                                            .onTapGesture {
+                                                print(coordinate.latitude)
+                                                self.viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
+                                                addButtonTapped = false
+                                            }
+                                            
+                                            ForEach(cities, id: \.self) { city in
+                                                HStack {
+                                                    
+                                                    
+                                                    
                                                     Text("\(city.city!), ")
                                                         .foregroundColor(searchText.isEmpty ? .white : .black)
                                                         .fontWeight(.bold)
                                                         .padding(.leading, 40)
-                                                
                                                     
-                                                Text("\(city.country!)")
-                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
-                                                Spacer()
-                                                
-//                                                if searchText.count == 0 {
+                                                    
+                                                    Text("\(city.country!)")
+                                                        .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                    Spacer()
+                                                    
+                                                    //                                                if searchText.count == 0 {
                                                     Button(action: {
-
+                                                        
                                                         let myIndex = citiesArray.firstIndex(of: city.city!)
-
+                                                        
                                                         delete(index: myIndex ?? -1)
-
+                                                        
                                                         if myIndex != nil {
                                                             citiesArray.remove(at: myIndex!)
                                                         }
-
-
-
+                                                        
+                                                        
+                                                        
                                                         print(citiesArray)
-
+                                                        
                                                     }) {
                                                         Circle()
                                                             .fill(searchText.isEmpty ? Color.red : Color.black)
@@ -230,62 +232,62 @@ struct ContentView: View {
                                                             .padding(.horizontal)
                                                             .padding(.trailing)
                                                     }
-//                                                }
+                                                    //                                                }
+                                                    
+                                                    
+                                                    
+                                                    //                                                Text("\(0)°")
+                                                    //                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                    //                                                    .fontWeight(.bold)
+                                                    //                                                    .font(.title3)
+                                                    //                                                    .padding(.trailing, 40)
+                                                }
+                                                .padding(.bottom, 30)
                                                 
-                                             
-                                                
-                                                //                                                Text("\(0)°")
-                                                //                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
-                                                //                                                    .fontWeight(.bold)
-                                                //                                                    .font(.title3)
-                                                //                                                    .padding(.trailing, 40)
-                                            }
-                                            .padding(.bottom, 30)
-                                       
-                                            //                                            .onAppear {
-                                            //                                                viewModel.fetchOneCityWeather(city: city.city.lowercased())
-                                            //                                            }
-                                            .onAppear {
-                                                if citiesArray.firstIndex(of: city.city!) == nil {
-                                                    citiesArray.insert(city.city!, at: 0)
-                                                    citiesArray.sort()
+                                                //                                            .onAppear {
+                                                //                                                viewModel.fetchOneCityWeather(city: city.city.lowercased())
+                                                //                                            }
+                                                .onAppear {
+                                                    if citiesArray.firstIndex(of: city.city!) == nil {
+                                                        citiesArray.insert(city.city!, at: 0)
+                                                        citiesArray.sort()
+                                                    }
+                                                    
+                                                    print(coordinate.longitude)
+                                                }
+                                                .onTapGesture {
+                                                    
+                                                    //                                                selectedCity = city
+                                                    
+                                                    print(city.city!)
+                                                    
+                                                    
+                                                    
+                                                    self.viewModel.fetchAllWeather(lat: city.lat, long: city.lng)
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    addButtonTapped = false
+                                                    
+                                                    
+                                                    
                                                 }
                                                 
-                                                print(coordinate.longitude)
-                                            }
-                                            .onTapGesture {
                                                 
-//                                                selectedCity = city
-                                                
-                                                print(city.city!)
-                                                   
-                                                   
-                                       
-                                                    self.viewModel.fetchAllWeather(lat: city.lat, long: city.lng)
+                                                //                                            Spacer()
                                                 
                                                 
                                                 
                                                 
-                                                addButtonTapped = false
-                                                
-                                                
-                                                
-                                            }
-                                            
-                                            
-//                                            Spacer()
-                                            
-                                            
-                                            
-                                            
-                                        }.padding(.top, 30)
+                                            }.padding(.top, 30)
                                         }
                                     }
                                     
                                     if searchText.count >= 3 {
                                         ScrollView {
                                             
-                                            ForEach(fetcher.cities.filter({"\($0)".contains(searchText)}), id: \.self) { city in
+                                            ForEach(fetcher.cities.filter({"\(String(describing: $0.city))".contains(searchText)}), id: \.self) { city in
                                                 
                                                 
                                                 HStack {
@@ -303,7 +305,7 @@ struct ContentView: View {
                                                     keyboardInUse = false
                                                     self.hideKeyboard()
                                                     
-//                                                    citiesArray.append(city.city!)
+                                                    //                                                    citiesArray.append(city.city!)
                                                     
                                                     if citiesArray.firstIndex(of: city.city!) == nil {
                                                         citiesArray.insert(city.city!, at: 0)
@@ -318,7 +320,7 @@ struct ContentView: View {
                                                     }
                                                     
                                                     
-                                                
+                                                    
                                                     
                                                     
                                                 }
@@ -344,9 +346,12 @@ struct ContentView: View {
                         .transition(AnyTransition.opacity)
                         .background(
                             RoundedRectangle(cornerRadius: 25)
-                                
+                                .fill(Color.black)
+                                .shadow(color: Color.black, radius: 10, x: 0, y: 0)
                                 //                .padding(.top, 50)
                                 .padding(.horizontal, 10)
+                                
+                                
                         )
                     } else {
                         
@@ -415,16 +420,18 @@ struct ContentView: View {
                         HStack {
                             
                             VStack() {
+                                
+                                
+                                Spacer()
+                                
+                                Text("\(viewModel.currentWeather?.main.humidity ?? 0)")
+                                    .font(.system(size: 35, weight: .bold, design: .default))
+                                    .foregroundColor(Color(#colorLiteral(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479, alpha: 1)))
+                                    .padding()
+                                
                                 Text("humidity")
                                     .font(.system(size: 12, weight: .semibold, design: .default))
                                     .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
-                                    .padding()
-                                //
-                                //                                Spacer()
-                                
-                                Text("\(viewModel.currentWeather?.main.humidity ?? 0)")
-                                    .font(.system(size: 23, weight: .bold, design: .default))
-                                    .foregroundColor(Color(#colorLiteral(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479, alpha: 1)))
                                     .padding()
                                 
                                 
@@ -432,16 +439,13 @@ struct ContentView: View {
                             
                             VStack {
                                 
-                                Text("wind")
-                                    .font(.system(size: 15, weight: .semibold, design: .default))
-                                    .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
-                                    .padding()
                                 
-                                //                                Spacer()
+                                
+                                Spacer()
                                 
                                 HStack(spacing: 5) {
                                     Text("\(Int(viewModel.currentWeather?.wind.speed ?? 0))")
-                                        .font(.system(size: 23, weight: .bold, design: .default))
+                                        .font(.system(size: 35, weight: .bold, design: .default))
                                         .foregroundColor(Color(.black))
                                     
                                     Text("mph")
@@ -451,43 +455,51 @@ struct ContentView: View {
                                         .foregroundColor(Color(#colorLiteral(red: 0.4431372549, green: 0.431372549, blue: 0.431372549, alpha: 1)))
                                 }.padding()
                                 
+                                Text("wind")
+                                    .font(.system(size: 15, weight: .semibold, design: .default))
+                                    .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
+                                    .padding()
+                                
                                 
                                 
                             }
                             
                             VStack {
+                                
+                                
+                                Spacer()
+                                
+                                Text("\(viewModel.currentTempMax ?? 0)°")
+                                    .font(.system(size: 35, weight: .bold, design: .default))
+                                    .foregroundColor(Color(#colorLiteral(red: 0.7215686275, green: 0.3529411765, blue: 1, alpha: 1)))
+                                    .padding()
+                                
                                 Text("high")
                                     .font(.system(size: 15, weight: .semibold, design: .default))
                                     .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
                                     .padding()
                                 
-                                //                                Spacer()
-                                
-                                Text("\(viewModel.currentTempMax ?? 0)°")
-                                    .font(.system(size: 23, weight: .bold, design: .default))
-                                    .foregroundColor(Color(#colorLiteral(red: 0.7215686275, green: 0.3529411765, blue: 1, alpha: 1)))
-                                    .padding()
-                                
                             }
                             
                             VStack {
+                                
+                                Spacer()
+                                
+                                Text("\(viewModel.currentTempMin ?? 0)°")
+                                    .font(.system(size: 35, weight: .bold, design: .default))
+                                    .foregroundColor(Color(#colorLiteral(red: 0.9098039216, green: 0.6549019608, blue: 0.1725490196, alpha: 1)))
+                                    .padding()
+                                
                                 Text("low")
                                     .font(.system(size: 15, weight: .semibold, design: .default))
                                     .foregroundColor(Color(#colorLiteral(red: 0.6823529412, green: 0.6823529412, blue: 0.6823529412, alpha: 1)))
                                     .padding()
-                                
-                                //                                Spacer()
-                                
-                                Text("\(viewModel.currentTempMin ?? 0)°")
-                                    .font(.system(size: 23, weight: .bold, design: .default))
-                                    .foregroundColor(Color(#colorLiteral(red: 0.9098039216, green: 0.6549019608, blue: 0.1725490196, alpha: 1)))
-                                    .padding()
                             }
                             
-                        }.frame(width: UIScreen.main.bounds.width - 45, height: 100)
+                        }.frame(width: UIScreen.main.bounds.width - 45, height: 125)
                         .background(
                             RoundedRectangle(cornerRadius: 17)
-                                .fill(Color.white)
+                                .fill(Color(UIColor(named: "myColor")!))
                                 .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0.0, y: 0.0)
                         )
                         
@@ -553,12 +565,13 @@ struct ContentView: View {
                                                 
                                             }
                                             .padding()
-//                                            .padding(.vertical, 30)
-                                           
+                                            //                                            .padding(.vertical, 30)
+                                            
                                             .background(
                                                 RoundedRectangle(cornerRadius: 17)
-                                                    .fill(Color(#colorLiteral(red: 0.3064880073, green: 0.7133082747, blue: 0.8459003568, alpha: 1)))
+                                                    .fill(Color(#colorLiteral(red: 0.5861129761, green: 0.2378639579, blue: 0.996984899, alpha: 0.9555174973)))
                                                     .shadow(color: Color.black.opacity(0.6), radius: 3, x: 0, y: 0)
+                                                    .frame(minWidth: 100)
                                             )
                                             .padding(15)
                                             
@@ -582,16 +595,17 @@ struct ContentView: View {
                                                     .fontWeight(.semibold)
                                             }
                                             .padding()
-//                                            .padding(.vertical, 10)
+                                            //                                            .padding(.vertical, 10)
                                             
                                             .background(
                                                 RoundedRectangle(cornerRadius: 17)
-                                                    .fill(Color.white)
+                                                    .fill(Color(UIColor(named: "myColor")!))
                                                     .shadow(color: Color.black.opacity(0.6), radius: 3, x: 0, y: 0)
+                                                    .frame(minWidth: 100)
                                             )
                                             .padding(15)
                                         }
-                                   
+                                        
                                         
                                         
                                     }
@@ -599,7 +613,7 @@ struct ContentView: View {
                                 
                                 
                             }
-                        
+                            
                             
                             
                             
@@ -650,23 +664,23 @@ struct ContentView: View {
             }
             .onAppear(perform: {
                 
-//                if coordinate.latitude == 0.0 {
-//                    DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
-//                        print(coordinate.latitude)
-//                        self.viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
-//                        print("watied 1 second")
-//                    }
-//                }
-//e
-//                print(coordinate.latitude)
-//                self.viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
-//                addButtonTapped = false
-//
-//                viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
-//
-//                print(coordinate.latitude)
-//
-//                print("ON APPEAR")
+                //                if coordinate.latitude == 0.0 {
+                //                    DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
+                //                        print(coordinate.latitude)
+                //                        self.viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
+                //                        print("watied 1 second")
+                //                    }
+                //                }
+                //e
+                //                print(coordinate.latitude)
+                //                self.viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
+                //                addButtonTapped = false
+                //
+                //                viewModel.fetchAllWeather(lat: coordinate.latitude, long: coordinate.longitude)
+                //
+                //                print(coordinate.latitude)
+                //
+                //                print("ON APPEAR")
                 
                 var lat = locationManager.location?.coordinate.latitude
                 var long = locationManager.location?.coordinate.longitude
@@ -679,33 +693,33 @@ struct ContentView: View {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                                 
                                 lat = locationManager.location?.coordinate.latitude
-                                 long = locationManager.location?.coordinate.longitude
-
+                                long = locationManager.location?.coordinate.longitude
+                                
                                 self.viewModel.fetchAllWeather(lat: lat ?? 0, long: long ?? 0)
                             }
                         } else {
-                           
+                            
                             
                             self.viewModel.fetchAllWeather(lat: lat!, long: long!)
                         }
                         
                         
                         lat = locationManager.location?.coordinate.latitude
-                         long = locationManager.location?.coordinate.longitude
-
+                        long = locationManager.location?.coordinate.longitude
+                        
                         self.viewModel.fetchAllWeather(lat: lat ?? 0, long: long ?? 0)
                     }
                 } else {
-                   
+                    
                     
                     self.viewModel.fetchAllWeather(lat: lat!, long: long!)
                 }
                 
-               
-           
                 
                 
-             
+                
+                
+                
                 
             })
             .padding(.horizontal, 30)
@@ -759,42 +773,47 @@ struct ContentView: View {
                                     Text("\(Int(daily.temp.min))°")
                                         .font(.system(size: 23, weight: .semibold, design: .rounded))
                                         .foregroundColor(Color(#colorLiteral(red: 0.7347081304, green: 0.8017949462, blue: 0.8352752328, alpha: 1)))
-                                }.padding(20)
+                                }
+                                .background(Color(UIColor(named: "myColor")!))
+                                .padding(20)
                                 .padding(.vertical, 10)
                                 Divider()
                             }
                             
                         }
-                     
                         
-                     
-                    
-                            
+                        
+                        
+                        
+                        
                     }
                     .padding(.bottom, 50)
                     .frame(width: UIScreen.main.bounds.width)
                     .background(
                         Color.white.opacity(dismissCard ? 0.2 : 1)
-                            
-                           
+                        
+                        
                     )
                     
                 }
+                .onTapGesture {
+                    showNextWeek = false
+                }
                 
-              
                 
-               
+                
+                
                 Spacer()
                 
             }
             .padding(30)
             .background(
-            
+                
                 RoundedRectangle(cornerRadius: 18)
                     .fill(Color(dismissCard ? #colorLiteral(red: 0.2613917291, green: 0.6402744055, blue: 0.9006297588, alpha: 0.6237081566) : #colorLiteral(red: 0.2613917291, green: 0.6402744055, blue: 0.9006297588, alpha: 1)))
                     .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height - 100)
-                    
-            
+                
+                
             )
             .offset(y: showNextWeek ? self.draggedOffset.height + 50 : 1000)
             .gesture(DragGesture()
@@ -809,13 +828,13 @@ struct ContentView: View {
                                 self.dismissCard = false
                                 
                             }
-                          
+                            
                         }
                         .onEnded { value in
                             
                             if value.translation.height > 365 {
                                 showNextWeek = false
-                               
+                                
                                 self.draggedOffset = CGSize.zero
                             } else {
                                 self.draggedOffset = CGSize.zero
@@ -825,12 +844,12 @@ struct ContentView: View {
                             
                         }
                      
-                        
+                     
             )
             .animation(.spring())
-      
             
-    
+            
+            
             
             
             
@@ -844,18 +863,18 @@ struct ContentView: View {
         if index == -1 {
             return
         } else {
-        let deletedCity = cities[index]
-        viewContext.delete(deletedCity)
-        
-        saveContext()
+            let deletedCity = cities[index]
+            viewContext.delete(deletedCity)
+            
+            saveContext()
         }
     }
     
     
     
     func epochToTime(epoch: Int) -> String {
-
-
+        
+        
         let date = NSDate(timeIntervalSince1970: TimeInterval(epoch))
         let dateFormatter = DateFormatter()
         dateFormatter.timeStyle = .medium
@@ -863,6 +882,8 @@ struct ContentView: View {
         dateFormatter.amSymbol = "AM"
         dateFormatter.pmSymbol = "PM"
         var dateString = dateFormatter.string(from: date as Date)
+        
+        dateString = dateString.replacingOccurrences(of: ":00", with: "")
         
         if dateString.first == "0" {
             dateString.remove(at: dateString.startIndex)
@@ -881,7 +902,7 @@ struct ContentView: View {
         
         return dateFormatter.string(from: date as Date)
     }
-
+    
     
     
     
@@ -896,19 +917,20 @@ struct ContentView_Previews: PreviewProvider {
     }
 }
 
-//struct CitiesCard: View {
-//
-//
-//    @Binding var selectedCity: Cities
-//  @ObservedObject private var viewModel = WeatherViewModel()
-//    @Binding var addButtonTapped: Bool
-//
-//    var body: some View {
-//
-//    }
-//}
+struct CustomTextField: View {
+    var placeholder: Text
+    @Binding var text: String
+    var editingChanged: (Bool)->() = { _ in }
+    var commit: ()->() = { }
 
-
+    var body: some View {
+        ZStack(alignment: .leading) {
+            if text.isEmpty { placeholder }
+            TextField("", text: $text, onEditingChanged: editingChanged, onCommit: commit)
+                .foregroundColor(.black)
+        }
+    }
+}
 
 
 
