@@ -42,9 +42,10 @@ struct ContentView: View {
     @FetchRequest(entity: City.entity(), sortDescriptors: [
         NSSortDescriptor(keyPath: \City.city, ascending: true)
     ]) private var cities: FetchedResults<City>
+
     private var indexOfCities = 0
     @State private var citiesArray = [String]()
-    
+    @State private var menuShown = false
     @State var addButtonTapped = false
     @State var hourlyTemps = [Hourly]()
     @State var searchText = ""
@@ -66,8 +67,8 @@ struct ContentView: View {
     @State var showNextWeek = false
     
     @ObservedObject public var viewModel = WeatherViewModel()
-    
-    
+    @AppStorage("lightMode") var lightMode = true
+    @AppStorage("imperialMode") private var imperialMode = true
     @ObservedObject private var locationManager = LocationManager()
     
     fileprivate func saveContext() {
@@ -83,10 +84,17 @@ struct ContentView: View {
         
         let coordinate = self.locationManager.location != nil ? self.locationManager.location!.coordinate : CLLocationCoordinate2D()
         
-        
         ZStack {
-            Color(colorScheme == .light ? #colorLiteral(red: 0.9371728301, green: 0.9373074174, blue: 0.9371433854, alpha: 1) : #colorLiteral(red: 0.08657442778, green: 0.08659679443, blue: 0.08657146245, alpha: 1) )
+            SlidingMenuView()
+                .background( Color(lightMode ? .white : .black)
+                                .edgesIgnoringSafeArea(.all)
+                                 )
+        ZStack {
+            
+            Color(lightMode ? #colorLiteral(red: 0.9371728301, green: 0.9373074174, blue: 0.9371433854, alpha: 1) : .black)
+                .shadow(color: lightMode ? .black : .white, radius: 4)
                 .edgesIgnoringSafeArea(.all)
+                
             
             
             
@@ -106,38 +114,46 @@ struct ContentView: View {
                         
                         HStack {
                             
+                            Button(action: {menuShown.toggle()}) {
+                                Image(systemName: "line.horizontal.3.circle")
+                                    .foregroundColor(lightMode ? .black : .white)
+                                    .font(.system(size: 30))
+                                    .rotationEffect(.degrees(menuShown ? 90 : 0))
+                                    .animation(.easeInOut)
+                            }
+                            
                             if selectedCity.city == "Current Location"  {
                                 Spacer()
                                 Text(addButtonTapped ? "add" : "\(viewModel.name ?? "")")
                                     .fontWeight(addButtonTapped ? .light : .bold)
-                                    .foregroundColor(colorScheme == .light ? .black : .white)
+                                    .foregroundColor(lightMode ? .black : .white)
                                 
                                 if viewModel.name != nil {
                                     Text(addButtonTapped ? "" : ",")
                                         .fontWeight(addButtonTapped ? .light : .bold)
-                                        .foregroundColor(colorScheme == .light ? .black : .white)
+                                        .foregroundColor(lightMode ? .black : .white)
                                 }
                                 
                                 Text(addButtonTapped ? "city" : "\(viewModel.country ?? "")")
                                     .fontWeight(addButtonTapped ? .bold : .light)
-                                    .foregroundColor(colorScheme == .light ? .black : .white)
+                                    .foregroundColor( lightMode ? .black : .white)
                                 
                                 Spacer()
                             } else {
                                 Spacer()
                                 Text(addButtonTapped ? "add" : "\(selectedCity.city )")
                                     .fontWeight(addButtonTapped ? .light : .bold)
-                                    .foregroundColor(colorScheme == .light ? .black : .white)
+                                    .foregroundColor(lightMode ? .black : .white)
                                 
                                 if viewModel.name != nil {
                                     Text(addButtonTapped ? "" : ",")
                                         .fontWeight(addButtonTapped ? .light : .bold)
-                                        .foregroundColor(colorScheme == .light ? .black : .white)
+                                        .foregroundColor(lightMode ? .black : .white)
                                 }
                                 
                                 Text(addButtonTapped ? "city" : "\(selectedCity.country )")
                                     .fontWeight(addButtonTapped ? .bold : .light)
-                                    .foregroundColor(colorScheme == .light ? .black : .white)
+                                    .foregroundColor(lightMode ? .black : .white)
                                 
                                 Spacer()
                             }
@@ -176,7 +192,7 @@ struct ContentView: View {
                                         VStack {
                                             HStack {
                                                 Text("Current Location")
-                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                    .foregroundColor(searchText.isEmpty ? .white : lightMode ? .black : Color(#colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)))
                                                     .fontWeight(.heavy)
                                                     .padding(.leading, 40)
                                                 Spacer()
@@ -196,13 +212,13 @@ struct ContentView: View {
                                                     
                                                     
                                                     Text("\(city.city!), ")
-                                                        .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                        .foregroundColor(searchText.isEmpty ? .white : lightMode ? .black : Color(#colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)))
                                                         .fontWeight(.bold)
                                                         .padding(.leading, 40)
                                                     
                                                     
                                                     Text("\(city.country!)")
-                                                        .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                        .foregroundColor(searchText.isEmpty ? .white : lightMode ? .black : Color(#colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)))
                                                     Spacer()
                                                     
                                                     //                                                if searchText.count == 0 {
@@ -298,7 +314,7 @@ struct ContentView: View {
                                                         
                                                         .padding()
                                                 }
-                                                .background(Color.black)
+                                                .background(lightMode ? Color.black : Color(#colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)))
                                                 .padding(.horizontal, 40)
                                                 .onTapGesture {
                                                     searchText = ""
@@ -346,8 +362,8 @@ struct ContentView: View {
                         .transition(AnyTransition.opacity)
                         .background(
                             RoundedRectangle(cornerRadius: 25)
-                                .fill(Color.black)
-                                .shadow(color: Color.black, radius: 10, x: 0, y: 0)
+                                .fill(Color(lightMode ? .black : #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)))
+                                .shadow(color: lightMode ? Color.black : Color(#colorLiteral(red: 0.7597532258, green: 0.7597532258, blue: 0.7597532258, alpha: 1)), radius: 10, x: 0, y: 0)
                                 //                .padding(.top, 50)
                                 .padding(.horizontal, 10)
                                 
@@ -444,13 +460,18 @@ struct ContentView: View {
                                 Spacer()
                                 
                                 HStack(spacing: 5) {
-                                    Text("\(Int(viewModel.currentWeather?.wind.speed ?? 0))")
-                                        .font(.system(size: 35, weight: .bold, design: .default))
+                                    Text("\((imperialMode ? Int(viewModel.currentWeather?.wind.speed ?? 0) : mphTokph(mph: viewModel.currentWeather?.wind.speed ?? 0)))")
+                                        .font(.system(size: 32, weight: .bold, design: .default))
                                         .foregroundColor(Color(.black))
+                                
+                             
+                                    Text("\(imperialMode ? "mph" : "kph" )")
+                                            .font(.caption2)
+                                            .lineLimit(1)
                                     
-                                    Text("mph")
-                                        .font(.caption2)
-                                        .lineLimit(1)
+                                    
+               
+                                 
                                         
                                         .foregroundColor(Color(#colorLiteral(red: 0.4431372549, green: 0.431372549, blue: 0.431372549, alpha: 1)))
                                 }.padding()
@@ -509,6 +530,7 @@ struct ContentView: View {
                             HStack {
                                 Text("today")
                                     .font(.system(size: 23, weight: .semibold, design: .default))
+                                    .foregroundColor(lightMode ? .black : .white)
                                     .padding(40)
                                 
                                 Spacer()
@@ -565,6 +587,7 @@ struct ContentView: View {
                                                 
                                             }
                                             .padding()
+                                            
                                             //                                            .padding(.vertical, 30)
                                             
                                             .background(
@@ -576,22 +599,23 @@ struct ContentView: View {
                                             .padding(15)
                                             
                                             
+                                            
                                         } else {
                                             VStack {
                                                 Text("\(epochToTime(epoch: hour.dt))")
-                                                    .foregroundColor(Color(#colorLiteral(red: 0.4548646212, green: 0.454932034, blue: 0.4548440576, alpha: 1)))
+                                                    .foregroundColor(Color(lightMode ? #colorLiteral(red: 0.4548646212, green: 0.454932034, blue: 0.4548440576, alpha: 1) : .white))
                                                 
                                                 Spacer()
                                                 
                                                 Image(systemName: "\(returnWeatherIconInverted(id: viewModel.currentWeather?.weather.first?.id ?? -1))")
                                                     .font(Font.largeTitle.weight(.semibold))
-                                                    .foregroundColor(Color(#colorLiteral(red: 0.4548646212, green: 0.454932034, blue: 0.4548440576, alpha: 1)))
+                                                    .foregroundColor(Color(lightMode ? #colorLiteral(red: 0.4548646212, green: 0.454932034, blue: 0.4548440576, alpha: 1) : .white))
                                                     .frame(width: 30, height: 30)
                                                 
                                                 Spacer()
                                                 
                                                 Text("\(Int(hour.temp))°")
-                                                    .foregroundColor(Color(#colorLiteral(red: 0.4548646212, green: 0.454932034, blue: 0.4548440576, alpha: 1)))
+                                                    .foregroundColor(Color(lightMode ? #colorLiteral(red: 0.4548646212, green: 0.454932034, blue: 0.4548440576, alpha: 1) : .white))
                                                     .fontWeight(.semibold)
                                             }
                                             .padding()
@@ -599,7 +623,7 @@ struct ContentView: View {
                                             
                                             .background(
                                                 RoundedRectangle(cornerRadius: 17)
-                                                    .fill(Color(UIColor(named: "myColor")!))
+                                                    .fill(Color(lightMode ? #colorLiteral(red: 0.9960234761, green: 0.9898574948, blue: 1, alpha: 1) : #colorLiteral(red: 0.3751846552, green: 0.3739859462, blue: 0.3772246242, alpha: 1)))
                                                     .shadow(color: Color.black.opacity(0.6), radius: 3, x: 0, y: 0)
                                                     .frame(minWidth: 100)
                                             )
@@ -642,13 +666,13 @@ struct ContentView: View {
                             
                         }) {
                             Circle()
-                                .fill(addButtonTapped ? .black : Color.white)
+                                .fill(addButtonTapped ? lightMode ? .black : .white : lightMode ? Color.white : Color(#colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)))
                                 .frame(width: 90, height: 90)
                                 .padding(.horizontal)
                                 .shadow(color: Color(addButtonTapped ? .black : #colorLiteral(red: 0.7450370193, green: 0.7255315781, blue: 0.7254028916, alpha: 1)), radius: 4, x: 0, y: 0)
                                 .overlay(
                                     Image(systemName: "xmark")
-                                        .foregroundColor(Color( addButtonTapped ? .white : #colorLiteral(red: 0.7450370193, green: 0.7255315781, blue: 0.7254028916, alpha: 1)) )
+                                        .foregroundColor(Color( addButtonTapped ? lightMode ? .white : #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1) : lightMode ?  #colorLiteral(red: 0.7450370193, green: 0.7255315781, blue: 0.7254028916, alpha: 1) : .white) )
                                         .font(.system(size: 35, weight: .bold, design: .rounded))
                                         
                                         .rotationEffect(.degrees(addButtonTapped ? 0 : 135))
@@ -762,23 +786,30 @@ struct ContentView: View {
                                 HStack {
                                     Image(systemName: returnWeatherIcon(id: daily.weather[0].id))
                                         .font(.system(size: 30, weight: .light, design: .rounded))
-                                        .foregroundColor(Color(#colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)))
+                                        .foregroundColor(Color(lightMode ? #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1) : .white))
                                     Text("\(epochToDayName(epoch: daily.dt).lowercased())")
                                         .padding(.horizontal)
-                                        .foregroundColor(Color(#colorLiteral(red: 0.1215686277, green: 0.01176470611, blue: 0.2250791796, alpha: 1)))
+                                        .foregroundColor(Color(lightMode ? #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1) : .white))
                                         .font(.system(size: 26, weight: .semibold, design: .rounded))
                                     Spacer()
                                     Text("\(Int(daily.temp.max))°")
                                         .font(.system(size: 25, weight: .semibold, design: .rounded))
+                                            .foregroundColor(Color(lightMode ? #colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1) : .white))
                                     Text("\(Int(daily.temp.min))°")
                                         .font(.system(size: 23, weight: .semibold, design: .rounded))
                                         .foregroundColor(Color(#colorLiteral(red: 0.7347081304, green: 0.8017949462, blue: 0.8352752328, alpha: 1)))
                                 }
-                                .background(Color(UIColor(named: "myColor")!))
                                 .padding(20)
                                 .padding(.vertical, 10)
-                                Divider()
+                                .background(lightMode ? Color.white : Color.black)
+                                if lightMode {
+                                    Divider()
+                                }
+                          
+                                    
                             }
+                            .opacity(dismissCard ? 0.3 : 1)
+
                             
                         }
                         
@@ -854,6 +885,13 @@ struct ContentView: View {
             
             
         }
+        .scaleEffect(menuShown ? 0.8 : 1)
+        .offset(x: menuShown ? 200 : 0)
+        .animation(.easeInOut(duration: 0.2))
+     
+        
+        }
+
         
         
     }
@@ -901,6 +939,10 @@ struct ContentView: View {
         dateFormatter.dateFormat = "EEEE"
         
         return dateFormatter.string(from: date as Date)
+    }
+    
+    func mphTokph(mph: Double) -> Int {
+        return Int(mph * 1.609)
     }
     
     

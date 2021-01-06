@@ -13,7 +13,7 @@ import CoreLocation
 
 class WeatherViewModel: ObservableObject {
     
-    
+    @AppStorage("imperialMode") var imperialMode = true
     //    @Published var weatherViewModels = WeatherViewModel()
     @Published var currentWeather: WeatherData?
     @Published var currentTemp: Int?
@@ -44,7 +44,7 @@ class WeatherViewModel: ObservableObject {
         let safeCity = city.lowercased().filter("abcdefghigklmnopqrstuvwxyz+".contains)
         print(safeCity)
 
-        let urlStr = URL(string: url + safeCity)
+        let urlStr = URL(string: url + safeCity + "&units=\(imperialMode ? "imperial" : "metric")")
         
         cancellable = URLSession.shared.dataTaskPublisher(for: (urlStr)!)
             .receive(on: DispatchQueue.main)
@@ -56,12 +56,13 @@ class WeatherViewModel: ObservableObject {
                 if let weatherData = try? JSONDecoder().decode(WeatherData.self, from: data) {
                     // Set weather
 
+                    
                     self.currentWeather = weatherData
-                    self.currentTemp = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp)))
-                    self.currentFeelsLike = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.feels_like)))
-                    self.currentTempMax = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp_max)))
-                    self.currentTempMin = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp_min)))
-                    self.cityTemp = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp)))
+                    self.currentTemp = Int(weatherData.main.temp)
+                    self.currentFeelsLike = Int(weatherData.main.feels_like)
+                    self.currentTempMax = Int(weatherData.main.temp_max)
+                    self.currentTempMin = Int(weatherData.main.temp_min)
+                    self.cityTemp = Int(weatherData.main.temp)
                     self.lat = weatherData.coord.lat
                     self.long = weatherData.coord.lon
                     self.name = weatherData.name
@@ -87,7 +88,7 @@ class WeatherViewModel: ObservableObject {
     
 
     public func fetchHourlyWeather(lat: Double, long: Double) {
-        let urlStr = URL(string: oneUrl + "\(lat)&lon=\(long)&exclude=current,minutely,alerts&units=imperial")
+        let urlStr = URL(string: oneUrl + "\(lat)&lon=\(long)&exclude=current,minutely,alerts&units=\(imperialMode ? "imperial" : "metric")")
 
         cancellable = URLSession.shared.dataTaskPublisher(for: (urlStr)!)
             .receive(on: DispatchQueue.main)
@@ -119,7 +120,7 @@ class WeatherViewModel: ObservableObject {
     
     public func fetchAllWeather(lat: Double, long: Double) {
         
-        let urlStr = URL(string: coordUrl + "\(lat)&lon=\(long)")
+        let urlStr = URL(string: coordUrl + "\(lat)&lon=\(long)&units=\(imperialMode ? "imperial" : "metric")")
     
         cancellable = URLSession.shared.dataTaskPublisher(for: (urlStr)!)
             .receive(on: DispatchQueue.main)
@@ -132,11 +133,11 @@ class WeatherViewModel: ObservableObject {
                     // Set weather
 
                     self.currentWeather = weatherData
-                    self.currentTemp = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp)))
-                    self.currentFeelsLike = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.feels_like)))
-                    self.currentTempMax = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp_max)))
-                    self.currentTempMin = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp_min)))
-                    self.cityTemp = self.toFahrenheit(celsius: (self.toCelsius(kelvin: weatherData.main.temp)))
+                    self.currentTemp = Int(weatherData.main.temp)
+                    self.currentFeelsLike = Int(weatherData.main.feels_like)
+                    self.currentTempMax = Int(weatherData.main.temp_max)
+                    self.currentTempMin = Int(weatherData.main.temp_min)
+                    self.cityTemp = Int(weatherData.main.temp)
                     self.name = weatherData.name
                     self.country = weatherData.sys.country
                     
