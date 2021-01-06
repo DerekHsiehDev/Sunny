@@ -238,7 +238,7 @@ struct ContentView: View {
                                                         
                                                     }) {
                                                         Circle()
-                                                            .fill(searchText.isEmpty ? Color.red : Color.black)
+                                                            .fill(searchText.isEmpty ? Color.red : lightMode ? Color.black : Color(#colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)))
                                                             .frame(width: 35, height: 35)
                                                             .overlay(
                                                                 Image(systemName: "xmark")
