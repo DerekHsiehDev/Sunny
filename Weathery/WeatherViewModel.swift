@@ -40,12 +40,12 @@ class WeatherViewModel: ObservableObject {
     
      func fetchWeather(city: String) {
         
+//       let safeCity = city.replacingOccurrences(of: "_", with: "%20")
+  let safeCity  = city.lowercased().filter("abcdefghigklmnopqrstuvwxyz+".contains)
         
-        let safeCity = city.lowercased().filter("abcdefghigklmnopqrstuvwxyz+".contains)
         print(safeCity)
 
         let urlStr = URL(string: url + safeCity + "&units=\(imperialMode ? "imperial" : "metric")")
-        
         cancellable = URLSession.shared.dataTaskPublisher(for: (urlStr)!)
             .receive(on: DispatchQueue.main)
             .sink { (_) in
@@ -121,7 +121,6 @@ class WeatherViewModel: ObservableObject {
     public func fetchAllWeather(lat: Double, long: Double) {
         
         let urlStr = URL(string: coordUrl + "\(lat)&lon=\(long)&units=\(imperialMode ? "imperial" : "metric")")
-    
         cancellable = URLSession.shared.dataTaskPublisher(for: (urlStr)!)
             .receive(on: DispatchQueue.main)
             .sink { (_) in

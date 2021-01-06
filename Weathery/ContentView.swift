@@ -243,7 +243,7 @@ struct ContentView: View {
                                                             .overlay(
                                                                 Image(systemName: "xmark")
                                                                     .font(.system(size: 15))
-                                                                    .foregroundColor(searchText.isEmpty ? .white : .black)
+                                                                    .foregroundColor(searchText.isEmpty ? .white : lightMode ? Color.black : Color(#colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)))
                                                             )
                                                             .padding(.horizontal)
                                                             .padding(.trailing)
@@ -278,8 +278,14 @@ struct ContentView: View {
                                                     print(city.city!)
                                                     
                                                     
+                                                    if city.city == "Palm Desert" {
+                                                        self.viewModel.fetchAllWeather(lat: 33.8303, long: -116.5453)
+                                                    } else {
+                                                        
+                                                        self.viewModel.fetchAllWeather(lat: city.lat, long: city.lng)
+                                                    }
                                                     
-                                                    self.viewModel.fetchAllWeather(lat: city.lat, long: city.lng)
+//                                                    self.viewModel.fetchWeather(city: city.city!)
                                                     
                                                     
                                                     
